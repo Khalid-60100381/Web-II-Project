@@ -42,6 +42,13 @@
     <link href="css/examples.css" rel="stylesheet">
   </head>
   <body>
+    <!-- If the user has just registered an account, then display that the account registration is successful, and that
+    he may proceed to log in at the login page, else display the login page without the flash message -->
+    {{#if flashMessage}}
+      <div class="alert alert-success" role="alert">
+        {{flashMessage}}
+      </div>
+    {{/if}}
     <div class="bg-light min-vh-100 d-flex flex-row align-items-center">
       <div class="container">
         <div class="row justify-content-center">
@@ -79,7 +86,9 @@
                 <div class="card-body text-center">
                   <div>
                     <h2>Sign up</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    <p>Join the No #1 Community that helps cats in Qatar.<br>
+                    We work together as a Community to help cats all around Qatar and Provide them with food and shelter.
+                    </p>
                     <a href="/register" class="btn btn-lg btn-outline-light mt-3">Register Now!</a>
                   </div>
                 </div>
