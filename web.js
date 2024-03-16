@@ -8,10 +8,23 @@ const {engine} = require('express-handlebars')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 
+
+
+const locationsList = [
+    { name: "Feeding Site #1: Duhail", info: "Located near the sports complex, great for evening feedings." },
+    { name: "Feeding Site #2: Al Gharrafa", info: "Next to the shopping center, where many stray cats gather." },
+    { name: "Feeding Site #3: Al Rayyan", info: "Close to a residential area, with friendly locals." },
+    { name: "Feeding Site #4: Al Wakrah", info: "Near the coastline, popular feeding spot in the mornings." }
+  ];
+//Will be accessed from DB later on, Just for testing cases now
+
+
 let app = express()
 app.set ('views', __dirname+"/templates")
 app.set('view engine', 'handlebars')
-app.engine('handlebars', engine())
+app.engine('handlebars', engine({
+    partialsDir: __dirname + '/templates/partials'
+  }));
 app.use(bodyParser.urlencoded())
 app.use(cookieParser())
 
@@ -27,7 +40,10 @@ app.get("/", async (req, res) => {
     res.cookie("sessionID", userSession.sessionID, {expires: userSession.sessionExpiry})
 
     //Greet the user with the main landing page
-    res.render("landing_page", {layout:undefined})
+    res.render("landing_page",{
+        layout:undefined,
+        locations: locationsList        
+    })
 })
 
 app.get("/login", async (req, res) => {

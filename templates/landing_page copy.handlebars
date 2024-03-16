@@ -32,11 +32,6 @@
     <link href="css/style.css" rel="stylesheet">
     <!-- We use those styles to show code examples, you should remove them in your application.-->
     <link href="css/examples.css" rel="stylesheet">
-    <!-- Leaflet Maps.-->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""/>
-  
     <title>Stray Cat Feeding System</title>
 </head>
 <style>
@@ -76,37 +71,22 @@ h2 {
 }
 
 /* Add some padding and define a more distinct style for the signup section */
-#location-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 1rem;
-}
-
-#location-list li {
-  background: #f7f7f7;
-  border: 1px solid #ddd;
-  padding: 0.5rem 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.about-us,
 .signup-section {
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 0.25rem;
+  padding: 2rem;
+  background-color: #f8f9fa; /* A very light grey background */
+  border: 1px solid #dee2e6; /* A light grey border */
+  border-radius: 0.25rem; /* Rounded corners for the section */
 }
 
-.about-us h2,
-.signup-section h3 {
-  margin-top: 0;
+/* Adjust the button size and alignment */
+.signup-section .btn {
+  padding: 0.75rem 1.5rem; /* Larger padding for a larger button */
+  font-size: 1.25rem; /* Larger font size */
 }
 
-  #map {
-    width: 45%; /* Responsive width */
-    height: 400px; /* Fixed height, adjust as necessary */
-    margin-top: 1rem; /* Add some space above the map */
+  .map-image {
+    width: 80%; /* Or any other size */
+    height: auto; /* This will keep the aspect ratio intact */
   }
     nav {
     background-color: #3c40ff;
@@ -128,7 +108,6 @@ h2 {
   } 
 </style>
 <body class="c-app">
-  <!-- CoreUI Header --> 
   <header class="c-header c-header-light c-header-fixed">
   <ul class="nav nav-pills">
   <li class="nav-item">
@@ -155,14 +134,21 @@ h2 {
     <main class="c-main">
       <div class="container-fluid">
         <div class="row">
-          {{> map }}
-            <!-- About Us and Sign Up Column -->
-        <div class="col-md-6">
-          <div class="about-us">
+          <!-- Map of Qatar -->
+          <div class="col-md-6">
+            <!-- Placeholder for dynamic map. You can later replace this with OpenMap or similar -->
+            <img src="https://ontheworldmap.com/qatar/large-detailed-map-of-qatar-with-cities-and-towns-max.jpg" alt="Map of Qatar" class="map-image">
+          </div>
+          
+          <!-- About Us Preview -->
+          <div class="col-md-6">
             <h2>About Us</h2>
             <p>Welcome to our community initiative for stray cats! We're a local animal shelter that has created a network of feeding locations for stray cats across Qatar. Our mission is to nurture and protect these animals, and we invite you to learn more about our cause.</p>
             <a href="/about" class="btn btn-primary">More...</a>
           </div>
+        </div>
+
+        <!-- Signup Section -->
           <div class="signup-section">
             <h3>Interested in helping? Join us!</h3>
             <p>Become a part of our community and help support stray cats. Sign up today and get involved!</p>
@@ -170,15 +156,11 @@ h2 {
           </div>
         </div>
       </div>
-    </div>
     </main>
   </div>
 
   <!-- CoreUI Scripts -->
   <script src="vendors/@coreui/coreui/js/coreui.bundle.min.js"></script>
   <script src="vendors/simplebar/js/simplebar.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
 </body>
 </html>
