@@ -64,25 +64,36 @@ app.get("/register", async (req, res) => {
     res.render("register", {layout:undefined})
 })
 
+app.get("/HomePage", async (req, res) => {
+    //Get the Fixed Location List
+    const fixed_locations = await location.getlocations()
+    res.render("member_page",{
+        layout:undefined,
+        locations: fixed_locations        
+    })
+})
+
+app.get("/admin-page", async (req, res) => {
+    res.render("admin_page",{
+        layout:undefined,
+    })
+})
+
 app.post("/login", async (req, res) => {
     //To do: change the user's role in the current user's session from "publicViewer" to "member"
     let usernameInput = req.body.usernameInput
     let passwordInput = req.body.passwordInput
     let userSession = await session_management.getSession(req.cookies.sessionID)
     let result = await auth.authenticateLogin(usernameInput, passwordInput)
+    
 
     if(!result){
         await flash_messages.setFlash(userSession.sessionID, "Incorrect username/password.")
         res.redirect("/login")
     }
     else{
-        console.log("success")
-        console.log(usernameInput)
-        console.log(passwordInput)
-        res.render("landing_page",{
-            layout:undefined,
-            locations: locationsList        
-        })
+        //res.redirect("/HomePage") // for memebr
+        res.redirect("admin-page") // for admin
     }
     
 })
