@@ -2,6 +2,7 @@ const session_management = require("./business_layer/session_management.js")
 const registration_form_validation = require("./business_layer/registration_form_validation.js")
 const account_registration = require("./business_layer/account_registration")
 const flash_messages = require("./business_layer/flash_messages.js")
+const auth = require("./business_layer/authentication.js")
 
 const express = require('express')
 const {engine} = require('express-handlebars')
@@ -16,7 +17,7 @@ const locationsList = [
     { name: "Feeding Site #3: Al Rayyan", info: "Close to a residential area, with friendly locals." },
     { name: "Feeding Site #4: Al Wakrah", info: "Near the coastline, popular feeding spot in the mornings." }
   ];
-//Will be accessed from DB later on, Just for testing cases now
+//TO DO: Will be accessed from DB later on, Just for testing cases now
 
 
 let app = express()
@@ -66,9 +67,21 @@ app.post("/login", async (req, res) => {
     //To do: Authenticate user here + change the user's role in the current user's session from "publicViewer" to "member"
     let usernameInput = req.body.usernameInput
     let passwordInput = req.body.passwordInput
+    let result = await auth.authenticateLoing(usernameInput, passwordInput)
 
-    console.log(usernameInput)
-    console.log(passwordInput)
+    if(!result){
+        console.log("login failed")
+    }
+    else{
+        console.log("success")
+        console.log(usernameInput)
+        console.log(passwordInput)
+        res.render("landing_page",{
+            layout:undefined,
+            locations: locationsList        
+        })
+    }
+    
 })
 
 app.post("/register", async (req, res) => {

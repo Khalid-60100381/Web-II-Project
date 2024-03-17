@@ -1,5 +1,4 @@
 const mongodb = require('mongodb')
-
 // Initialize database client connection, database option, users, and session collections as global variables to 
 // connect to database only once and reuse that same connection across multiple functions
 let client = undefined
@@ -48,8 +47,16 @@ async function registerAccount(userDetails){
     if (result.acknowledged){
         return true
     }
-
     return false
+}
+
+async function authenticateLoing(usernameInput){
+    await persistence.connectDatabase()
+
+    const user = await users.findOne({"userDetails.username": usernameInput})
+    if (!user){
+        return false
+    }
 }
 
 async function checkDuplicateSessionID(sessionID){
@@ -91,7 +98,7 @@ module.exports = {
     checkDuplicateSessionID,
     startSession,
     getSession,
-    updateSession
+    updateSession,
 }
 
 
