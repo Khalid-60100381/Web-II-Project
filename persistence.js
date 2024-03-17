@@ -5,6 +5,7 @@ let client = undefined
 let db = undefined
 let users = undefined
 let sessions = undefined
+let locations = undefined
 
 async function connectDatabase() {
     //If a client connection does not exist, create one
@@ -14,6 +15,7 @@ async function connectDatabase() {
         db = client.db('web2Project')
         users = db.collection('users')
         sessions = db.collection('sessions')
+        locations = db.collection('location_list')
     }
 }
 
@@ -91,6 +93,13 @@ async function findUserAccount(usernameInput){
     return userAccount
 }
 
+async function getlocations(){
+    await connectDatabase()
+    const cursor = await locations.find() //Pointer to the object list 
+    const fixed_locations = await cursor.toArray(); //Turning the object list into an to loop through in handlebar
+    return fixed_locations
+}
+
 module.exports = {
     checkUsernameExists,
     checkEmailExists,
@@ -99,7 +108,8 @@ module.exports = {
     startSession,
     getSession,
     updateSession,
-    findUserAccount
+    findUserAccount,
+    getlocations
 }
 
 

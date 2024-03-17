@@ -3,6 +3,8 @@ const registration_form_validation = require("./business_layer/registration_form
 const account_registration = require("./business_layer/account_registration")
 const flash_messages = require("./business_layer/flash_messages.js")
 const auth = require("./business_layer/authentication.js")
+const location = require("./business_layer/location_management.js")
+
 
 const express = require('express')
 const {engine} = require('express-handlebars')
@@ -11,15 +13,16 @@ const cookieParser = require('cookie-parser')
 
 
 
-
-//TO DO: Will be accessed from DB later on, Just for testing cases now
-
-
 let app = express()
 app.set ('views', __dirname+"/templates")
 app.set('view engine', 'handlebars')
 app.engine('handlebars', engine({
-    partialsDir: __dirname + '/templates/partials'
+    partialsDir: __dirname + '/templates/partials',
+    helpers: { //Helper function to stringfy the location data in handlebars
+        json: function(context){
+            return JSON.stringify(context)
+        }
+    }
   }));
 app.use(bodyParser.urlencoded())
 app.use(cookieParser())
@@ -35,10 +38,13 @@ app.get("/", async (req, res) => {
     // database are simultaneously deleted)
     res.cookie("sessionID", userSession.sessionID, {expires: userSession.sessionExpiry})
 
+    //Get the Fixed Location List
+    const fixed_locations = await location.getlocations()
+
     //Greet the user with the main landing page
     res.render("landing_page",{
         layout:undefined,
-        locations: locationsList        
+        locations: fixed_locations       
     })
 })
 

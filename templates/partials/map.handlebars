@@ -22,12 +22,7 @@
               });
 
               // Add markers to the map
-              var locations = [
-                { latLng: [25.276987, 51.520008], name: "Feeding Site #1: Duhail" },
-                { latLng: [25.291210, 51.530014], name: "Feeding Site #2: Al Gharrafa" },
-                { latLng: [25.260495, 51.492058], name: "Feeding Site #3: Al Rayyan" },
-                { latLng: [25.213416, 51.505737], name: "Feeding Site #4: Al Wakrah" }
-              ];
+              var locations = {{{json locations}}};
 
               // Loop through the locations and add a marker for each
               locations.forEach(function(location) {
