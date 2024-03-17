@@ -11,12 +11,7 @@ const cookieParser = require('cookie-parser')
 
 
 
-const locationsList = [
-    { name: "Feeding Site #1: Duhail", info: "Located near the sports complex, great for evening feedings." },
-    { name: "Feeding Site #2: Al Gharrafa", info: "Next to the shopping center, where many stray cats gather." },
-    { name: "Feeding Site #3: Al Rayyan", info: "Close to a residential area, with friendly locals." },
-    { name: "Feeding Site #4: Al Wakrah", info: "Near the coastline, popular feeding spot in the mornings." }
-  ];
+
 //TO DO: Will be accessed from DB later on, Just for testing cases now
 
 
@@ -64,13 +59,15 @@ app.get("/register", async (req, res) => {
 })
 
 app.post("/login", async (req, res) => {
-    //To do: Authenticate user here + change the user's role in the current user's session from "publicViewer" to "member"
+    //To do: change the user's role in the current user's session from "publicViewer" to "member"
     let usernameInput = req.body.usernameInput
     let passwordInput = req.body.passwordInput
-    let result = await auth.authenticateLoing(usernameInput, passwordInput)
+    let userSession = await session_management.getSession(req.cookies.sessionID)
+    let result = await auth.authenticateLogin(usernameInput, passwordInput)
 
     if(!result){
-        console.log("login failed")
+        await flash_messages.setFlash(userSession.sessionID, "Incorrect username/password.")
+        res.redirect("/login")
     }
     else{
         console.log("success")

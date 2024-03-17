@@ -50,15 +50,6 @@ async function registerAccount(userDetails){
     return false
 }
 
-async function authenticateLoing(usernameInput){
-    await persistence.connectDatabase()
-
-    const user = await users.findOne({"userDetails.username": usernameInput})
-    if (!user){
-        return false
-    }
-}
-
 async function checkDuplicateSessionID(sessionID){
     await connectDatabase()
     let sessionDetails = await sessions.findOne({"userSession.sessionID":sessionID})
@@ -89,7 +80,16 @@ async function updateSession(sessionID, userSession){
     await sessions.replaceOne({sessionID:sessionID}, userSession)
 }
 
+async function findUserAccount(usernameInput){
+    await connectDatabase()
+    let userAccount = await users.findOne({"userDetails.username":usernameInput})
+//Checks if user exists in the database
+    if (userAccount === null){
+        return false
+    }
 
+    return userAccount
+}
 
 module.exports = {
     checkUsernameExists,
@@ -99,6 +99,7 @@ module.exports = {
     startSession,
     getSession,
     updateSession,
+    findUserAccount
 }
 
 
