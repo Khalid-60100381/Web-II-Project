@@ -53,6 +53,7 @@
                 <!-- Unless an error message exists, render normal registration form -->
                 {{#unless errorMessage}}
                     <form action="/register" method="POST">
+                        <input type="hidden" name="csrfToken" value={{csrfToken}}>
                         <div class="input-group mb-3"><span class="input-group-text">
                             <svg class="icon">
                             <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-user"></use>

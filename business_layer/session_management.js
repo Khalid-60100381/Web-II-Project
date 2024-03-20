@@ -27,16 +27,22 @@ async function startSession(sessionData){
 
 //Retrieve the user's current session from the database
 async function getSession(sessionID){
-    return persistence.getSession(sessionID)
+    return await persistence.getSession(sessionID)
 }
 
 //Update the user's current session in the database with the new session data
 async function updateSession(sessionID, userSession){
-    return persistence.updateSession(sessionID, userSession)
+    return await persistence.updateSession(sessionID, userSession)
+}
+
+//Delete the user's current session from the database
+async function deleteSession(sessionID){
+    await persistence.deleteSession(sessionID)
 }
 
 module.exports = {
     startSession,
     getSession,
-    updateSession
+    updateSession,
+    deleteSession
 }

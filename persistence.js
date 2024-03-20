@@ -6,15 +6,17 @@ let client = undefined
 let db = undefined
 let users = undefined
 let sessions = undefined
+let locations = undefined
 
 async function connectDatabase() {
-    //If a client connection does not exist, create one
+    //If a client connection does not exist, create one and connect to and store the database collections in variables
     if (!client) {
         client = new mongodb.MongoClient("mongodb+srv://almabroukbenomran:60104920@cluster0.2nmiwkr.mongodb.net/")
         await client.connect()
         db = client.db('web2Project')
         users = db.collection('users')
         sessions = db.collection('sessions')
+        locations = db.collection('location_list')
     }
 }
 
@@ -56,7 +58,7 @@ async function checkDuplicateSessionID(sessionID){
     await connectDatabase()
     let sessionDetails = await sessions.findOne({"userSession.sessionID":sessionID})
 
-    //Check if a existing user already has an identical email in the database
+    //Check if an identical sessionID exists in the database
     if (sessionDetails === null){
         return false
     }
@@ -82,6 +84,34 @@ async function updateSession(sessionID, userSession){
     await sessions.replaceOne({sessionID:sessionID}, userSession)
 }
 
+// Search for a matching sessionID in the sessions collection, and delete the user's current session from the database
+async function deleteSession(sessionID){
+    await connectDatabase()
+    await sessions.deleteOne({sessionID:sessionID})
+}
+
+// Search for a matching username in the users collection to retrieve a user's account
+async function findUserAccount(usernameInput){
+    await connectDatabase()
+    let userAccount = await users.findOne({"userDetails.username":usernameInput})
+
+    if (userAccount === null){
+        return false
+    }
+
+    return userAccount
+}
+
+// Fetch the pointer to the object list and convert the pointer into an array, then return it
+async function getlocations(){
+    await connectDatabase()
+    const cursor = await locations.find() //Pointer to the object list 
+    const fixed_locations = await cursor.toArray(); //Turning the object list into an to loop through in handlebar
+    return fixed_locations
+}
+
+
+
 
 
 module.exports = {
@@ -91,7 +121,10 @@ module.exports = {
     checkDuplicateSessionID,
     startSession,
     getSession,
-    updateSession
+    updateSession,
+    findUserAccount,
+    deleteSession,
+    getlocations
 }
 
 

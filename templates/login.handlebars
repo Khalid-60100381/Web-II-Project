@@ -43,10 +43,27 @@
   </head>
   <body>
     <!-- If the user has just registered an account, then display that the account registration is successful, and that
-    he may proceed to log in at the login page, else display the login page without the flash message -->
-    {{#if flashMessage}}
+    he may proceed to log in at the login page, and if any session expiry error occurs, then display that the session
+    has expired and that the user must either login or register again depending on the route that generated the session
+    error -->
+    {{#if registrationConfirmation}}
       <div class="alert alert-success" role="alert">
-        {{flashMessage}}
+        {{registrationConfirmation}}
+      </div>
+    {{/if}}
+    {{#if sessionExpiryError}}
+      <div class="alert alert-danger" role="alert">
+        {{sessionExpiryError}}
+      </div>
+    {{/if}}
+    {{#if emptyLoginFields}}
+      <div class="alert alert-danger" role="alert">
+        {{emptyLoginFields}}
+      </div>
+    {{/if}}
+    {{#if incorrectCredentials}}
+      <div class="alert alert-danger" role="alert">
+        {{incorrectCredentials}}
       </div>
     {{/if}}
     <div class="bg-light min-vh-100 d-flex flex-row align-items-center">

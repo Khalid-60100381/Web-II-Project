@@ -2,6 +2,11 @@ const session_management = require("./business_layer/session_management.js")
 const registration_form_validation = require("./business_layer/registration_form_validation.js")
 const account_registration = require("./business_layer/account_registration")
 const flash_messages = require("./business_layer/flash_messages.js")
+const location = require("./business_layer/location_management.js")
+const authentication = require("./business_layer/authentication.js")
+const login_form_validation = require("./business_layer/login_form_validation.js")
+const authorization = require("./business_layer/authorization.js")
+const csrf_protection = require("./business_layer/csrf_protection.js") //CSRF PROTECTION MEASURES IN PROGRESS.....
 
 const express = require('express')
 const {engine} = require('express-handlebars')
@@ -11,7 +16,16 @@ const cookieParser = require('cookie-parser')
 let app = express()
 app.set ('views', __dirname+"/templates")
 app.set('view engine', 'handlebars')
-app.engine('handlebars', engine())
+
+app.engine('handlebars', engine({
+    partialsDir: __dirname + '/templates/partials',
+    helpers: { //Helper function to stringfy the location data in handlebars
+        json: function(context){
+            return JSON.stringify(context)
+        }
+    }
+  }))
+
 app.use(bodyParser.urlencoded())
 app.use(cookieParser())
 
@@ -26,33 +40,193 @@ app.get("/", async (req, res) => {
     // database are simultaneously deleted)
     res.cookie("sessionID", userSession.sessionID, {expires: userSession.sessionExpiry})
 
+    //Get the Fixed Location List
+    const fixed_locations = await location.getlocations()
+
     //Greet the user with the main landing page
-    res.render("landing_page", {layout:undefined})
+    res.render("landing_page", {
+        layout:undefined,
+        locations: fixed_locations
+    })
 })
 
 app.get("/login", async (req, res) => {
     //Retrieve the current user's session ID from the cookie value, then check if the user's current session has any
     // stored flash message, if yes, then render the flash message to the user in the login page
     let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+    
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should login again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please login again.")
+        res.redirect("/login")
+
+        return
+    }
+
+    // Check and Retrieve any flash messages that are part of the user's current session
     let flashMessage = await flash_messages.getFlash(sessionID)
 
-    res.render("login", {
-        layout: undefined,
-        flashMessage: flashMessage
-    })
+    // If no flash messages exist, then render the login page
+    if (!flashMessage){
+        res.render("login", {
+            layout: undefined
+        })
+    }
+
+    // If a flash message exists storing the session expiry error message coming from a /login route, then render the 
+    // error message as part of the login page
+    if (flashMessage === "Session expired, Please login again."){
+        let sessionExpiryError = flashMessage
+
+        res.render("login", {
+            layout: undefined,
+            sessionExpiryError: sessionExpiryError
+        })
+    }
+
+    // If a flash message exists storing the session expiry error message coming from a /register route, then render the 
+    // error message as part of the login page
+    if (flashMessage === "Session expired, Please register again."){
+        let sessionExpiryError = flashMessage
+
+        res.render("login", {
+            layout: undefined,
+            sessionExpiryError: sessionExpiryError
+        })
+    }
+
+    // If a flash message exists storing the registration confirmation message coming from the POST /register route, 
+    // then render the confirmation message as part of the login page
+    if (flashMessage === "Account has been successfully registered! Please log in."){
+        let registrationConfirmation = flashMessage
+
+        res.render("login", {
+            layout: undefined,
+            registrationConfirmation: registrationConfirmation
+        })
+    }
+
+    // If a flash message exists storing the registration confirmation message coming from the POST /register route, 
+    // then render the confirmation message as part of the login page
+    if (flashMessage === "Incorrect username or password."){
+        let incorrectCredentials = flashMessage
+
+        res.render("login", {
+            layout: undefined,
+            incorrectCredentials: incorrectCredentials
+        })
+    }
 })
 
 app.get("/register", async (req, res) => {
-    res.render("register", {layout:undefined})
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should register again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please register again.")
+        res.redirect("/login")
+
+        return
+    }
+
+    //
+    //let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
+    //If the current user's session passes all session validation, then render the register form
+    res.render("register", {
+        layout:undefined
+        //csrfToken: csrfToken
+    })
+})
+
+app.get("/HomePage", async (req, res) => {
+    //Get the Fixed Location List
+    const fixed_locations = await location.getlocations()
+    res.render("member_page",{
+        layout:undefined,
+        locations: fixed_locations        
+    })
+})
+
+app.get("/admin-page", async (req, res) => {
+    res.render("admin_page",{
+        layout:undefined,
+    })
 })
 
 app.post("/login", async (req, res) => {
-    //To do: Authenticate user here + change the user's role in the current user's session from "publicViewer" to "member"
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should login again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please login again.")
+        res.redirect("/login")
+
+        return
+    }
+
+    // Get the user's username and password input from the form fields, then send the values to the authentication
+    // sub-layer to validate user-inputted credentials against database credentials
     let usernameInput = req.body.usernameInput
     let passwordInput = req.body.passwordInput
 
-    console.log(usernameInput)
-    console.log(passwordInput)
+    let emptyFields = await login_form_validation.checkEmptyFields(usernameInput, passwordInput)
+
+    //Check if any empty fields exist (including whitespace characters)
+    if (emptyFields) {
+        return res.render("login", { 
+            layout: undefined, 
+            emptyLoginFields: "All fields must be filled in"
+        })
+    }
+
+    let result = await authentication.authenticateLogin(usernameInput, passwordInput)
+
+    // If the user-inputted credentials are incorrect, then set a flash message telling the user that either the username
+    // or password is incorrect, then redirect to the login page
+    if(!result){
+        await flash_messages.setFlash(userSession.sessionID, "Incorrect username or password.")
+        res.redirect("/login")
+
+        return
+    }
+
+    // If the user-inputted credentials are correct, then get the user's role stored in the user's account, modify the  
+    // user's role in the session data to either "member" or "admin" based on his account role, and redirect the user 
+    // to either the member page or admin page 
+    let userRole = await authorization.getUserRole(usernameInput)
+
+    if (userRole === "member"){
+        userSession.sessionData.role = "member"
+        await session_management.updateSession(sessionID, userSession)
+        res.redirect("/HomePage")
+    }
+
+    if (userRole === "admin"){
+        userSession.sessionData.role = "admin"
+        await session_management.updateSession(sessionID, userSession)
+        res.redirect("admin-page")
+    }
+    
 })
 
 app.post("/register", async (req, res) => {
@@ -226,20 +400,55 @@ app.post("/register", async (req, res) => {
         role:"member"
     }
 
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should register again, then redirect to the login page and exit the function 
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please register again.")
+        res.redirect("/login")
+
+        return
+    }
+    //CSRF PROTECTION MEASURES IN PROGRESS.....
+
+    /*
+    let csrfToken = req.body.csrfToken
+
+    if (userSession.sessionData.csrfToken !== csrfToken){
+        res.status(404)
+        return
+    }
+    */
+
     // Pass user details to account_registration business sub-layer to hash + salt user password
     let accountRegistered = await account_registration.registerAccount(userDetails)
-    // Retrieve the current user session from the database using the sessionID stored in the cookie
-    let userSession = await session_management.getSession(req.cookies.sessionID)
 
-    //If the user has successfully registered an account in the database, and the user has a currently active session, 
-    // and is a public viewer, then set a flash message to notify the user that the account registration is successful,
-    // and that he should log in, then redirect to the login page
-    if (accountRegistered && (userSession && userSession.sessionData.role === "publicViewer")){
+    //If the user has successfully registered an account in the database, then set a flash message to notify the user 
+    // that the account registration is successful, and that he should log in, then redirect to the login page
+    if (accountRegistered){
         await flash_messages.setFlash(userSession.sessionID, "Account has been successfully registered! Please log in.")
-        res.redirect("/login");
+        //await csrf_protection.cancelToken(sessionID)
+        res.redirect("/login")
     }
 })
 
+//CUSTOM 404 PAGE IN PROGRESS.....
+
+/*
+async function error404(req, res, next){
+    res.redirect("/admin-page")
+    next()
+}
+
+app.use(error404)
+*/
 
 app.listen(8000, () => {
     console.log("Application started on port 8000")
