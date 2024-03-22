@@ -66,6 +66,11 @@
         {{incorrectCredentials}}
       </div>
     {{/if}}
+    {{#if unauthorizedAccess}}
+      <div class="alert alert-danger" role="alert">
+        {{unauthorizedAccess}}
+      </div>
+    {{/if}}
     <div class="bg-light min-vh-100 d-flex flex-row align-items-center">
       <div class="container">
         <div class="row justify-content-center">

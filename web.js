@@ -13,7 +13,7 @@ const {engine} = require('express-handlebars')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 
-let app = express()
+const app = express()
 app.set ('views', __dirname+"/templates")
 app.set('view engine', 'handlebars')
 
@@ -112,7 +112,7 @@ app.get("/login", async (req, res) => {
         })
     }
 
-    // If a flash message exists storing the registration confirmation message coming from the POST /register route, 
+    // If a flash message exists storing the registration confirmation message coming from the POST /login route, 
     // then render the confirmation message as part of the login page
     if (flashMessage === "Incorrect username or password."){
         let incorrectCredentials = flashMessage
@@ -120,6 +120,17 @@ app.get("/login", async (req, res) => {
         res.render("login", {
             layout: undefined,
             incorrectCredentials: incorrectCredentials
+        })
+    }
+
+    // If a flash message exists storing the user login request message (unauthorized access) coming from the GET 
+    // /member-page or admin-page routes, then render the user login request message as part of the login page
+    if (flashMessage === "Please log in to your account."){
+        let unauthorizedAccess = flashMessage
+
+        res.render("login", {
+            layout: undefined,
+            unauthorizedAccess: unauthorizedAccess
         })
     }
 })
@@ -151,16 +162,71 @@ app.get("/register", async (req, res) => {
     })
 })
 
-app.get("/HomePage", async (req, res) => {
+app.get("/member-page", async (req, res) => {
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should register again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please login again.")
+        res.redirect("/login")
+
+        return
+    }
+
+    // If the user tries to directly access a protected route (/member-page) and the user's session data indicates that 
+    // the user is not authenticated as either a member or admin, then set a flash message asking the user to login with 
+    // his account and redirect the user to the login page
+    if (userSession.sessionData.role !== "member" && userSession.sessionData.role !== "admin"){
+        await flash_messages.setFlash(userSession.sessionID, "Please log in to your account.")
+        res.redirect("/login")
+
+        return
+    }
+
     //Get the Fixed Location List
     const fixed_locations = await location.getlocations()
-    res.render("member_page",{
-        layout:undefined,
-        locations: fixed_locations        
+
+    return res.render("member_page",{
+    layout:undefined,
+    locations: fixed_locations        
     })
 })
 
 app.get("/admin-page", async (req, res) => {
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should register again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please login again.")
+        res.redirect("/login")
+
+        return
+    }
+
+    // If the user tries to directly access a protected route (/admin-page) and the user's session data indicates that 
+    // the user is not authenticated as an admin, then set a flash message asking the user to login with his account and 
+    // redirect the user to the login page
+    if (userSession.sessionData.role !== "admin"){
+        await flash_messages.setFlash(userSession.sessionID, "Please log in to your account.")
+        res.redirect("/login")
+
+        return
+    }
+
     res.render("admin_page",{
         layout:undefined,
     })
@@ -218,13 +284,17 @@ app.post("/login", async (req, res) => {
     if (userRole === "member"){
         userSession.sessionData.role = "member"
         await session_management.updateSession(sessionID, userSession)
-        res.redirect("/HomePage")
+        res.redirect("/member-page")
+
+        return
     }
 
     if (userRole === "admin"){
         userSession.sessionData.role = "admin"
         await session_management.updateSession(sessionID, userSession)
         res.redirect("admin-page")
+
+        return
     }
     
 })
