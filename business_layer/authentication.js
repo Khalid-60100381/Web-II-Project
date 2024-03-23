@@ -20,6 +20,7 @@ async function authenticateLogin(usernameInput, passwordInput){
     const storedSalt = storedPassword.substring(0,separatorIndex)
     const storedHashedPassword = storedPassword.substring(separatorIndex + 1)
    
+
     const hashedInputPassword = crypto.createHash('sha512').update(storedSalt + passwordInput).digest('hex')
 
     if (hashedInputPassword === storedHashedPassword){
@@ -28,7 +29,6 @@ async function authenticateLogin(usernameInput, passwordInput){
         return false
     }
 }
-
 module.exports = {
     authenticateLogin
 }

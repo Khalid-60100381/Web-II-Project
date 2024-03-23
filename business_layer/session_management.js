@@ -1,3 +1,4 @@
+//Import required modules
 const persistence = require("../persistence.js")
 const crypto = require("crypto")
 

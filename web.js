@@ -31,22 +31,38 @@ app.use(cookieParser())
 
 
 app.get("/", async (req, res) => {
+    // Retrieve the current user's session ID from the cookie value, then check if the user's current sessionID 
+    // corresponds to an existing user session in the database
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+    
+    // If the browser cookie exists, and the user session in the database exists as well, then retrieve the list of 
+    // fixed feeding site locations from the database, and greet the user with the main landing page alongside the
+    // rendered locations
+    if (sessionID && userSession) {
+        const fixed_locations = await location.getlocations()
+
+        res.render("landing_page", {
+        layout:undefined,
+        locations: fixed_locations
+        })
+
+        return
+    }
     // Start user session for any user who visits the website, initially providing the role of "publicViewer" until the
     // user logs in as a member
-    let userSession = await session_management.startSession({role: "publicViewer"})
+    userSession = await session_management.startSession({role: "publicViewer"})
 
     //After creating the user session, and storing the session in the database, set a browser cookie containing the user's
     //sessionID value + session expiry timestamp (when session expires, the browser cookie + user session entry in 
     // database are simultaneously deleted)
     res.cookie("sessionID", userSession.sessionID, {expires: userSession.sessionExpiry})
 
-    //Get the Fixed Location List
     const fixed_locations = await location.getlocations()
-
-    //Greet the user with the main landing page
+        
     res.render("landing_page", {
-        layout:undefined,
-        locations: fixed_locations
+    layout:undefined,
+    locations: fixed_locations
     })
 })
 
@@ -153,7 +169,7 @@ app.get("/register", async (req, res) => {
         return
     }
 
-    // Check and Retrieve any flash messages that are part of the user's current session
+    //
     //let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
     //If the current user's session passes all session validation, then render the register form
     res.render("register", {
@@ -492,7 +508,7 @@ app.post("/register", async (req, res) => {
     let csrfToken = req.body.csrfToken
 
     if (userSession.sessionData.csrfToken !== csrfToken){
-        res.status(404)
+        res.status(401)
         return
     }
     */
@@ -509,16 +525,14 @@ app.post("/register", async (req, res) => {
     }
 })
 
-//CUSTOM 404 PAGE IN PROGRESS.....
 
-/*
-async function error404(req, res, next){
-    res.redirect("/admin-page")
-    next()
+async function error404(req, res){
+    res.status(404).render("404", {
+        layout: undefined
+    })
 }
 
 app.use(error404)
-*/
 
 app.listen(8000, () => {
     console.log("Application started on port 8000")

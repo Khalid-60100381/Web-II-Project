@@ -42,30 +42,35 @@
     <link href="css/examples.css" rel="stylesheet">
   </head>
   <body>
+
     <!-- If the user has just registered an account, then display that the account registration is successful, and that
-    he may proceed to log in at the login page, and if any session expiry error occurs, then display that the session
-    has expired and that the user must either login or register again depending on the route that generated the session
-    error -->
+    he may proceed to log in at the login page -->
     {{#if registrationConfirmation}}
       <div class="alert alert-success" role="alert">
         {{registrationConfirmation}}
       </div>
     {{/if}}
+    <!-- If any session expiry error occurs, then display that the session has expired and that the user must either 
+    login or register again depending on the route that generated the session error. -->
     {{#if sessionExpiryError}}
       <div class="alert alert-danger" role="alert">
         {{sessionExpiryError}}
       </div>
     {{/if}}
+    <!-- If any empty login fields are detected, then tell the user to fill in all fields. -->
     {{#if emptyLoginFields}}
       <div class="alert alert-danger" role="alert">
         {{emptyLoginFields}}
       </div>
     {{/if}}
+    <!-- if the user enters incorrect credentials, then display to the user that his credentials are incorrect -->
     {{#if incorrectCredentials}}
       <div class="alert alert-danger" role="alert">
         {{incorrectCredentials}}
       </div>
     {{/if}}
+     <!-- If the user tries to access a protected route without proper authentication, then display a message telling 
+     him that he cannot access a specific route -->
     {{#if unauthorizedAccess}}
       <div class="alert alert-danger" role="alert">
         {{unauthorizedAccess}}
