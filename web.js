@@ -153,7 +153,7 @@ app.get("/register", async (req, res) => {
         return
     }
 
-    //
+    // Check and Retrieve any flash messages that are part of the user's current session
     //let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
     //If the current user's session passes all session validation, then render the register form
     res.render("register", {

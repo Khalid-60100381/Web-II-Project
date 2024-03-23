@@ -1,6 +1,12 @@
 const persistence = require("../persistence.js")
 const crypto = require("crypto")
 
+
+/**
+ * Starts a new session for the user.
+ * @param {object} sessionData - Data to be stored in the user's session.
+ * @returns {object} - The user's session object.
+ */
 async function startSession(sessionData){
     //Generate a random sessionID
     let sessionID = crypto.randomUUID()
@@ -25,17 +31,28 @@ async function startSession(sessionData){
     return userSession
 }
 
-//Retrieve the user's current session from the database
+/**
+ * Retrieves the user's current session from the database.
+ * @param {string} sessionID - The ID of the user's session.
+ * @returns {object} - The user's session object.
+ */
 async function getSession(sessionID){
     return await persistence.getSession(sessionID)
 }
 
-//Update the user's current session in the database with the new session data
+/**
+ * Updates the user's current session in the database with new session data.
+ * @param {string} sessionID - The ID of the user's session.
+ * @param {object} userSession - The updated session data.
+ */
 async function updateSession(sessionID, userSession){
     return await persistence.updateSession(sessionID, userSession)
 }
 
-//Delete the user's current session from the database
+/**
+ * Deletes the user's current session from the database.
+ * @param {string} sessionID - The ID of the user's session.
+ */
 async function deleteSession(sessionID){
     await persistence.deleteSession(sessionID)
 }

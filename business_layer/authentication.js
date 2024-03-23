@@ -1,10 +1,13 @@
+// Import required modules
 const persistence = require("../persistence.js")
 const crypto = require("crypto")
 
-// Search for a matching user account in the database based on the user's username input, if the user's account is found,
-// then separate the salt from the hash of the combined salt and user password based on the colon delimeter, then
-// concatenate the salt and the user's password input, hash them, and if the resulting hash matches the hash in the
-// database, then the user-inputted credentials are correct and the user is authenticated
+/**
+ * Authenticates a user's login by comparing the hashed password with the stored hash.
+ * @param {string} usernameInput - The username input by the user.
+ * @param {string} passwordInput - The password input by the user.
+ * @returns {boolean|undefined} - True if authentication is successful, false if authentication fails, undefined if user not found.
+ */
 async function authenticateLogin(usernameInput, passwordInput){
     let userAccount = await persistence.findUserAccount(usernameInput)
 
@@ -17,7 +20,6 @@ async function authenticateLogin(usernameInput, passwordInput){
     const storedSalt = storedPassword.substring(0,separatorIndex)
     const storedHashedPassword = storedPassword.substring(separatorIndex + 1)
    
-
     const hashedInputPassword = crypto.createHash('sha512').update(storedSalt + passwordInput).digest('hex')
 
     if (hashedInputPassword === storedHashedPassword){
@@ -26,6 +28,7 @@ async function authenticateLogin(usernameInput, passwordInput){
         return false
     }
 }
+
 module.exports = {
     authenticateLogin
 }

@@ -1,20 +1,26 @@
+// Import required modules
 const session_management = require("./session_management.js")
 
-//Retrieve the user's current session, store the flash message as part of the user's current session, then update the
-// user's session in the database
+/**
+ * Sets a flash message for the user's session.
+ * @param {string} sessionID - The ID of the user's session.
+ * @param {string} flashMessage - The message to be set as a flash message.
+ */
 async function setFlash(sessionID, flashMessage){
     let userSession = await session_management.getSession(sessionID)
     userSession.flashMessage = flashMessage
     await session_management.updateSession(sessionID, userSession)
 }
 
-//Retrieve the user's current session, store the flash message in a variable, delete the flash message stored in the
-// user's current session, then update the user's session in the database, and return the flash message variable to be 
-// displayed to the user
+/**
+ * Retrieves and removes the flash message from the user's session.
+ * @param {string} sessionID - The ID of the user's session.
+ * @returns {string|undefined} - The flash message if found, undefined otherwise.
+ */
 async function getFlash(sessionID){
     let userSession = await session_management.getSession(sessionID)
 
-    //Check if the user has a currently active session
+    // Check if the user has an active session
     if (!userSession){
         return undefined
     }

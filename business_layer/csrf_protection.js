@@ -1,9 +1,12 @@
+// Import required modules
 const session_management = require("./session_management.js")
 const crypto = require("crypto")
 
-// Generate a random CSRF token, retrieve the user's session from the database and modify the user's session to include 
-// the generated CSRF token as a property of the session data, then update the user's session in the database and return 
-// the CSRF token
+/**
+ * Generates a random CSRF token, attaches it to the user's session, and returns the token.
+ * @param {string} sessionID - The ID of the user's session.
+ * @returns {string} - The generated CSRF token.
+ */
 async function generateCSRFFormToken(sessionID){
     let csrfToken = crypto.randomUUID()
     let userSession = await session_management.getSession(sessionID)
@@ -13,8 +16,10 @@ async function generateCSRFFormToken(sessionID){
     return csrfToken
 }
 
-// Retrieve the user's session from the database, delete the CSRF token property from the session data, then update the 
-// user's session in the database
+/**
+ * Deletes the CSRF token from the user's session.
+ * @param {string} sessionID - The ID of the user's session.
+ */
 async function cancelToken(sessionID){
     let userSession = await session_management.getSession(sessionID)
     delete userSession.sessionData.csrfToken

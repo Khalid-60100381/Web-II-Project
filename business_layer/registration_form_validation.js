@@ -1,8 +1,13 @@
 const persistence = require("../persistence.js")
 const passwordValidator = require("password-validator")
 
+/**
+ * Checks if the password and repeat password inputs match.
+ * @param {string} passwordInput - The user's password input.
+ * @param {string} repeatPasswordInput - The repeat password input for confirmation.
+ * @returns {boolean} - True if passwords match, false otherwise.
+ */
 async function checkPasswordMatch(passwordInput, repeatPasswordInput){
-    // Check if passwordInput and repeatPasswordInput are identical or not
     if (passwordInput !== repeatPasswordInput) {
         return false
     }
@@ -10,8 +15,18 @@ async function checkPasswordMatch(passwordInput, repeatPasswordInput){
     return true
 }
 
+/**
+ * Checks if any of the input fields in the registration form are empty.
+ * @param {string} firstnameInput - The user's first name input.
+ * @param {string} lastnameInput - The user's last name input.
+ * @param {string} emailInput - The user's email input.
+ * @param {string} usernameInput - The user's username input.
+ * @param {string} passwordInput - The user's password input.
+ * @param {string} repeatPasswordInput - The repeat password input for confirmation.
+ * @returns {boolean} - True if any field is empty, false otherwise.
+ */
+
 async function checkEmptyFields(firstnameInput, lastnameInput, emailInput, usernameInput, passwordInput, repeatPasswordInput){
-    //Check if any fields are empty
     if (firstnameInput.trim().length === 0 || lastnameInput.trim().length === 0 || emailInput.trim().length === 0 ||
         usernameInput.trim().length === 0 || passwordInput.trim().length === 0 || repeatPasswordInput.trim().length === 0) {
             return true
@@ -20,10 +35,17 @@ async function checkEmptyFields(firstnameInput, lastnameInput, emailInput, usern
     return false
 }
 
+/**
+ * Validates the format of the first name and last name inputs.
+ * @param {string} firstnameInput - The user's first name input.
+ * @param {string} lastnameInput - The user's last name input.
+ * @returns {boolean} - True if both first name and last name consist of letters only, false otherwise.
+ */
+
 async function validateFirstnameLastname(firstnameInput, lastnameInput){
     let firstnameContainsLetters = true
     let lastnameContainsLetters = true
-
+    // Check if first name consists of letters only
     for (let i = 0; i < firstnameInput.length; i++) {
         //If the current character is a whitespace, skip validation
         if (firstnameInput[i] === " "){
@@ -36,7 +58,7 @@ async function validateFirstnameLastname(firstnameInput, lastnameInput){
             firstnameContainsLetters = false
         }
     }
-
+    // Check if last name consists of letters only
     for (let i = 0; i < lastnameInput.length; i++) {
         //If the current character is a whitespace, skip validation
         if (lastnameInput[i] === " "){
@@ -44,7 +66,6 @@ async function validateFirstnameLastname(firstnameInput, lastnameInput){
         }
 
         let charCode = lastnameInput.charCodeAt(i);
-        //Check that lastname contains only letters (a-z or A-Z)
         if (!(charCode >= 65 && charCode <= 90) && !(charCode >= 97 && charCode <= 122)) {
             lastnameContainsLetters = false
         }
@@ -58,6 +79,12 @@ async function validateFirstnameLastname(firstnameInput, lastnameInput){
     return true
 }
 
+
+/**
+ * Validates the complexity of the password input.
+ * @param {string} passwordInput - The user's password input.
+ * @returns {boolean} - True if password meets complexity requirements, false otherwise.
+ */
 async function validatePasswordComplexity(passwordInput){
     let passwordSchema = new passwordValidator()
 
@@ -77,6 +104,11 @@ async function validatePasswordComplexity(passwordInput){
     return false
 }
 
+/**
+ * Validates the format of the username input.
+ * @param {string} usernameInput - The user's username input.
+ * @returns {boolean} - True if username format is valid, false otherwise.
+ */
 async function validateUsername(usernameInput){
     //Check if username is between 6 (inclusive) and 30 (inclusive)
     if (usernameInput.length < 6 || usernameInput.length > 30){
@@ -105,7 +137,11 @@ async function validateUsername(usernameInput){
     return true
 }
 
-//Check if the user-inputted username already exists in the database or not
+/**
+ * Checks if the user-inputted username already exists in the database.
+ * @param {string} usernameInput - The user's username input.
+ * @returns {boolean} - True if username already exists, false otherwise.
+ */
 async function checkUsernameExists(usernameInput){
     return persistence.checkUsernameExists(usernameInput)
 }

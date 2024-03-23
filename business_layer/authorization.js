@@ -1,6 +1,11 @@
+// Import required module
 const persistence = require("../persistence.js")
 
-//Fetch user's account from the database by matching the username parameter and return the user's role 
+/**
+ * Retrieves the role of a user from the database based on the username.
+ * @param {string} username - The username of the user.
+ * @returns {string} - The role of the user.
+ */
 async function getUserRole(username){
     let userAccount = await persistence.findUserAccount(username)
     return userAccount.userDetails.role
