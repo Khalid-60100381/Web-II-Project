@@ -1,11 +1,12 @@
 <!-- Leaflet map container -->
           <div id="map"></div>
+          <h2 class="locations-header">Locations:</h2>
 
           <!-- Leaflet JavaScript, consider using HTTPS if available -->
           <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
           <script>
             // Initialize the map on the "map" div with a given center and zoom
-              var map = L.map('map').setView([25.276987, 51.520008], 12);
+              var map = L.map('map').setView([25.2596, 51.5029], 12);
 
               // Add OpenStreetMap tiles
               L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -23,15 +24,21 @@
 
               // Add markers to the map
               var locations = {{{json locations}}};
+              var markers = [];
+        
 
               // Loop through the locations and add a marker for each
               locations.forEach(function(location) {
-                L.marker(location.latLng, {icon: arrowIcon}).addTo(map)
-                  .bindPopup(location.name);
+                var marker = L.marker(location.latLng, {icon: arrowIcon}).addTo(map)
+                  .bindPopup(location.name)
+
+                markers.push(marker);
+
+                             
               });
 
-              // Optionally, open the popup for the first marker
-              // L.marker(locations[0].latLng, {icon: arrowIcon}).addTo(map).openPopup();
+              markers[3].openPopup()
+
           </script>
           <ul id="location-list">
             {{#each locations}}
