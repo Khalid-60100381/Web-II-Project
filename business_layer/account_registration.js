@@ -1,5 +1,6 @@
 //Import required module
 const persistence = require("../persistence.js");
+const crypto = require("crypto");
 
 /**
  * Hashes and salts the password provided in the user details object.

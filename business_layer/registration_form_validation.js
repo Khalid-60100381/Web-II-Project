@@ -147,11 +147,29 @@ async function checkUsernameExists(usernameInput){
     return persistence.checkUsernameExists(usernameInput)
 }
 
-//Check if the user-inputted email already exists in the database or not
+/**
+ * Checks if the user-inputted email already exists in the database.
+ * @param {string} emailInput - The user's email input.
+ * @returns {boolean} - True if email already exists, false otherwise.
+ */
 async function checkEmailExists(emailInput){
     return persistence.checkEmailExists(emailInput)
 }
 
+/**
+ * Validates the format of the email input.
+ * @param {string} emailInput - The user's email input.
+ * @returns {boolean} - True if email format is valid, false otherwise.
+ */
+async function validateEmail(emailInput){
+    const re = new RegExp("^[a-zA-Z0-9-]+@+[a-zA-Z0-9-]+.+[a-zA-Z0-9-_]{2,63}$");
+    if(re.test(emailInput)){
+        return true
+    }
+    else{
+        return false
+    }
+}
 
 
 module.exports = {
@@ -161,5 +179,6 @@ module.exports = {
     validatePasswordComplexity,
     validateUsername,
     checkUsernameExists,
-    checkEmailExists
+    checkEmailExists,
+    validateEmail
 }

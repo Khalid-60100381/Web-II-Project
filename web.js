@@ -416,6 +416,8 @@ app.post("/register", async (req, res) => {
     // characters (both inclusive), and contains only valid Unix Characters (uppercase and lowercase letters, numbers, 
     // “-”, “.”, and “_”
     let usernameValidated = await registration_form_validation.validateUsername(usernameInput)
+    let emailValidated = await registration_form_validation.validateEmail(emailInput)
+
 
     //If username does not meet criteria
     if (!usernameValidated){
@@ -432,6 +434,21 @@ app.post("/register", async (req, res) => {
             firstnameInput: firstnameInput,
             lastnameInput: lastnameInput,
             emailInput: emailInput,
+            passwordInput: passwordInput,
+            repeatPasswordInput: repeatPasswordInput
+        })
+    }
+
+    //If email does not meet criteria
+    if (!emailValidated){
+        return res.render("register", { 
+            layout: undefined, 
+            errorMessage: "Invalid email format", 
+            // Pass all form inputs back to the template for repopulating the form, except for the email, and display 
+            // error message
+            firstnameInput: firstnameInput,
+            lastnameInput: lastnameInput,
+            usernameInput: usernameInput,
             passwordInput: passwordInput,
             repeatPasswordInput: repeatPasswordInput
         })
@@ -480,12 +497,12 @@ app.post("/register", async (req, res) => {
     let userDetails = {
         firstname: firstnameInput,
         lastname: lastnameInput,
-        email: emailInput,
         username: usernameInput,
         password: passwordInput,
         role:"member"
     }
 
+    
     // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
