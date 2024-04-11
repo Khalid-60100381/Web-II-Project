@@ -38,7 +38,7 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
   
-    <title>Stray Cat Feeding System</title>
+    <title>About us</title>
 </head>
 <style>
   /* Base layout styles */
@@ -59,34 +59,6 @@
     max-width: 50%;
     padding: 0 15px; /* Gutter for columns */
     box-sizing: border-box;
-  }
-
-  /* First column styles (map and locations list) */
-  .map-container {
-    padding: 1rem;
-    background-color: #e9ecef; /* Light background for contrast */
-    border-right: 2px solid #dadee4; /* Subtle border */
-  }
-
-  #map {
-    width: 100%; /* Responsive width */
-    height: 400px; /* Fixed height */
-    margin-bottom: 1rem; /* Space below the map */
-  }
-
-  #location-list {
-    list-style: none;
-    padding: 0;
-    margin-top: 1rem;
-  }
-
-  #location-list li {
-    background: #ffffff;
-    border: 1px solid #dadee4;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.5rem;
-    border-radius: 4px; /* Rounded corners */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
   }
 
   /* Second column styles (About and Signup sections) */
@@ -143,8 +115,6 @@
     margin: auto;
   }
 
-  /* ... Your other styles ... */
-
   /* Flex container for side by side alignment */
   .info-container {
     display: flex;
@@ -155,14 +125,15 @@
   }
 
   /* Style for the "About Us" and "Sign Up" sections */
-  .about-us,
   .signup-section {
     flex: 1; /* Both take equal width */
     min-width: 300px; /* Minimum width before wrapping */
     background: rgba(255, 255, 255, 0.899); /* Light grey background */
     border: 1px solid #000; /* Thin black outline */
     padding: 1rem;
+    margin-top: 2rem;
     margin-bottom: 2rem;
+    margin-right: 25em;
     border-radius: 0.25rem;
     box-sizing: border-box;
   }
@@ -172,11 +143,6 @@
     .col-md-6 {
       flex: 0 0 100%;
       max-width: 100%;
-    }
-
-    .map-container {
-      border-right: none;
-      border-bottom: 2px solid #dadee4;
     }
   }
 
@@ -190,12 +156,19 @@
       flex-direction: column;
     }
 
-    .about-us,
     .signup-section {
       /* Full width on small screens */
       flex: 0 0 100%;
     }
   }
+
+  .tenor-gif-embed {
+    margin: 0 auto;
+    margin-top: 5rem;
+    margin-bottom: 2rem;
+    display: block;
+  }
+
   .website-header {
     text-align: center; /* Centers the text horizontally */
     margin: 1rem 0; /* Adds some space above and below the header */
@@ -208,24 +181,30 @@
     margin: 0; /* Removes default margin */
     padding: 0.5rem; /* Adds some padding to increase clickable area if needed */
   }
+
+  .locations-header {
+    margin-top: 2rem; /* Adds space above the header */
+    margin-bottom: 1rem; /* Adds space below the header */
+    font-size: 1.5rem; /* Larger font size for the header */
+  }
 </style>
 
 <body class="c-app">
   <div class="website-header">
-    <h1>Stray Cat Locator</h1>
+    <h1>Learn More About Us</h1>
   </div>
   <!-- CoreUI Header --> 
 <header class="c-header c-header-light c-header-fixed">
     <div class="container">
         <ul class="nav nav-pills justify-content-center">
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/posts">Posts</a>
+                <a class="nav-link active" aria-current="page" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="/posts">Posts</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="/locations">Locations</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/about">About Us</a>
             </li>
             <li class="nav-item">
                 <a href="/login" class="nav-link">Login</a>
@@ -245,21 +224,48 @@
             {{/if}}
         </ul>
     </div>
+    <div class="tenor-gif-embed" data-postid="7879487544165061347" data-share-method="host" data-aspect-ratio="1.29032" data-width="25%">
+        <a href="https://tenor.com/view/pat-extasyxx-extase-gif-7879487544165061347">Pat Extasyxx GIF</a>
+        from <a href="https://tenor.com/search/pat-gifs">Pat GIFs</a>
+    </div> 
+    <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 </header>
 
 <div class="c-body">
   <main class="c-main">
     <div class="container-fluid">
-      <!-- Render the dynamic map -->
       <div class="row">
-        {{> map }}
-        <!-- About Us and Sign Up Column -->
-        <div class="info-container">
-          <div class="about-us">
-            <h2>About Us</h2>
-            <p>Welcome to our community initiative for stray cats! We're a local animal shelter that has created a network of feeding locations for stray cats across Qatar. Our mission is to nurture and protect these animals, and we invite you to learn more about our cause.</p>
-            <a href="/about" class="btn btn-primary">More...</a>
-          </div>
+        <h2 class="locations-header">Compassion In Action: Nurturing Qatar's Stray Cats</h2>
+            <p>
+                At the heart of our initiative lies a simple yet powerful inspiration: kindness. 
+                Born from Task 8 of the Genius Group Winter 24 competition, our project embodies the spirit of compassion by addressing 
+                the needs of our feline friends roaming the streets of Qatar. With each step we take, we honor the ethos of altruism 
+                and strive to create a brighter tomorrow for every whiskered companion in need.
+            </p>
+        <br>
+        <br>
+        <br>
+        <h2 class="locations-header">Why Are We Doing This?</h2>
+            <p>
+                As a local animal shelter, we recognized a pressing need to extend our reach beyond traditional confines. Thus, 
+                fueled by the desire to make a tangible difference, we embarked on a mission to construct a platform that not only maps 
+                out feeding stations for stray cats but also fosters a community of dedicated volunteers. Our website serves as a 
+                beacon of hope, illuminating the locations where these vulnerable creatures congregate in larger numbers. 
+                By raising awareness and rallying support, we strive to ensure that every meow is met with sustenance and, when needed, 
+                medical attention.
+            </p>
+        <br>
+        <br>
+        <br>
+        <br>
+        <h2 class="locations-header">We Need Your Support!</h2>
+            <p>
+                Our journey is far from over, and we need your help to continue making a difference. Whether you're a cat lover, 
+                a philanthropist, or simply someone who believes in the power of kindness, we invite you to join our cause. 
+                With each click and each visit, you become an integral part of our endeavor to nurture and protect these often 
+                overlooked members of our society. Join us as we pave the way towards a brighter, more compassionate future for 
+                Qatar's stray cats. Together, we can transform the lives of stray cats in Qatar, one meal at a time.
+            </p>
           <div class="signup-section">
             <h3>Interested in helping? Join us!</h3>
             <p>Become a part of our community and help support stray cats. Sign up today and get involved!</p>
@@ -267,7 +273,6 @@
           </div>
         </div>
       </div>
-    </div>
   </main>
 </div>
 

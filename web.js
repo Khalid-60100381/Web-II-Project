@@ -6,7 +6,7 @@ const location = require("./business_layer/location_management.js")
 const authentication = require("./business_layer/authentication.js")
 const login_form_validation = require("./business_layer/login_form_validation.js")
 const authorization = require("./business_layer/authorization.js")
-const csrf_protection = require("./business_layer/csrf_protection.js") //CSRF PROTECTION MEASURES IN PROGRESS.....
+const csrf_protection = require("./business_layer/csrf_protection.js")
 
 const express = require('express')
 const {engine} = require('express-handlebars')
@@ -36,10 +36,11 @@ app.get("/", async (req, res) => {
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
     
-    // If the browser cookie exists, and the user session in the database exists as well, then retrieve the list of 
-    // fixed feeding site locations from the database, and greet the user with the main landing page alongside the
-    // rendered locations
-    if (sessionID && userSession) {
+    // If the browser cookie exists, the user session in the database exists as well, and the user is not logged in as a 
+    // member or admin, then retrieve the list of fixed feeding site locations from the database, and greet the user with 
+    // the main landing page alongside the rendered locations without displaying the member dashboard or admin dashboard
+    // buttons in the navigation bar
+    if ((sessionID && userSession) && (userSession.sessionData.role !== "member" && userSession.sessionData.role !== "admin")) {
         const fixed_locations = await location.getlocations()
 
         res.render("landing_page", {
@@ -49,8 +50,39 @@ app.get("/", async (req, res) => {
 
         return
     }
+
+    // If the browser cookie exists, the user session in the database exists as well, and the user is logged in as a 
+    // member, then retrieve the list of fixed feeding site locations from the database, and greet the user with 
+    // the main landing page alongside the rendered locations, and display the member dashboard button in the navigation bar
+    if ((sessionID && userSession) && (userSession.sessionData.role === "member")) {
+        const fixed_locations = await location.getlocations()
+
+        res.render("landing_page", {
+        layout:undefined,
+        locations: fixed_locations,
+        userIsMember: true
+        })
+
+        return
+    }
+
+    // If the browser cookie exists, the user session in the database exists as well, and the user is logged in as an 
+    // admin, then retrieve the list of fixed feeding site locations from the database, and greet the user with 
+    // the main landing page alongside the rendered locations, and display the admin dashboard button in the navigation bar
+    if ((sessionID && userSession) && (userSession.sessionData.role === "admin")) {
+        const fixed_locations = await location.getlocations()
+
+        res.render("landing_page", {
+        layout:undefined,
+        locations: fixed_locations,
+        userIsAdmin: true
+        })
+
+        return
+    }
+
     // Start user session for any user who visits the website, initially providing the role of "publicViewer" until the
-    // user logs in as a member
+    // user logs in as a member or admin
     userSession = await session_management.startSession({role: "publicViewer"})
 
     //After creating the user session, and storing the session in the database, set a browser cookie containing the user's
@@ -473,9 +505,6 @@ app.post("/register", async (req, res) => {
         })
     }
 
-    //Validation checklist:
-    // - Check that email is formatted apropriately, better to wait until we take lecture about handling emails...
-
     //Create an object storing all validated user details + assign user to the "member" role
     let userDetails = {
         firstname: firstnameInput,
@@ -502,16 +531,6 @@ app.post("/register", async (req, res) => {
 
         return
     }
-    //CSRF PROTECTION MEASURES IN PROGRESS.....
-
-    /*
-    let csrfToken = req.body.csrfToken
-
-    if (userSession.sessionData.csrfToken !== csrfToken){
-        res.status(401)
-        return
-    }
-    */
 
     // Pass user details to account_registration business sub-layer to hash + salt user password
     let accountRegistered = await account_registration.registerAccount(userDetails)
@@ -520,11 +539,44 @@ app.post("/register", async (req, res) => {
     // that the account registration is successful, and that he should log in, then redirect to the login page
     if (accountRegistered){
         await flash_messages.setFlash(userSession.sessionID, "Account has been successfully registered! Please log in.")
-        //await csrf_protection.cancelToken(sessionID)
         res.redirect("/login")
     }
 })
 
+app.get("/about", async (req, res) => {
+    // Retrieve the current user's session ID from the cookie value, then check if the user's current sessionID 
+    // corresponds to an existing user session in the database
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie exists, the user session in the database exists as well, and the user is logged in as a 
+    // member, then greet the user with the about us page, and display the member dashboard button in the navigation bar
+    if ((sessionID && userSession) && (userSession.sessionData.role === "member")) {
+
+        res.render("about", {
+            layout: undefined,
+            userIsMember: true
+        })
+
+        return
+    }
+
+    // If the browser cookie exists, the user session in the database exists as well, and the user is logged in as an 
+    // admin, then greet the user with the about us page, and display the admin dashboard button in the navigation bar
+    if ((sessionID && userSession) && (userSession.sessionData.role === "admin")) {
+
+        res.render("about", {
+            layout: undefined,
+            userIsAdmin: true
+        })
+
+        return
+    }
+
+    res.render("about", {
+        layout: undefined
+    })
+})
 
 async function error404(req, res){
     res.status(404).render("404", {

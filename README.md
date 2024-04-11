@@ -4,11 +4,11 @@ A project for the INFS3201 course in "UDST" inspired by Task8 from the Genius Gr
 It is built using ExpressJS.
 
 # Frameworks
-The following frameworks were used in this project:
+The following packages were used in this project:
 - express
 - express-handlebars
 - body-parser
-- cookie-parse
+- cookie-parser
 - mongodb
 - crypto
 - password-validator
@@ -37,7 +37,7 @@ Visit the site using localhost on port 8000:
 > **Password**: `admin123` 
 
 # Member:
-> **User:** `member2`  
+> **User:** `member`  
 > **Password:** `Member@1234`
 
 ## Features
@@ -45,10 +45,10 @@ Visit the site using localhost on port 8000:
 - A public viewers page that dynamically loads the list of locations from the database
 - A map the also shows the locations as markers, also loaded from the database.
 - Session management system, keeps tracks of the user current state.
-- Route protection implented in the session management to prevent public viewres from accesing pages that needs login.
+- Route protection implented in the session management to prevent public viewers from accessing pages that require login.
 - Preventing members from routing to admin pages.
 - Session validation for all routes.
-- Regestration form validation.
+- Registration form validation.
 - Hashing user passwords.
 - Error 404 Page.
 
