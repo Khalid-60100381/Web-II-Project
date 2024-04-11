@@ -47,12 +47,11 @@ async function checkUsernameExists(usernameInput){
 async function checkEmailExists(emailInput){
     await connectDatabase()
     let userDetails = await users.findOne({"userDetails.email":emailInput})
-
     // Check if an existing user already has an identical email in the database
     if (userDetails === null){
-        return false
+        return true
     }
-    return true
+    return false
 }
 
 /**
