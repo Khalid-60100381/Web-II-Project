@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Meta tags for character encoding and viewport settings -->
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Meta tags for the page's content and author -->
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+
+    <!-- Link to CoreUI CSS styles with integrity for security and cross-origin attribute -->
     <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@4.3.2/dist/css/coreui.min.css" rel="stylesheet" integrity="sha384-H8oVKJOQVGGCdfFNM+9gLKN0xagtq9oiNLirmijheEuqD3kItTbTvoOGgxVKqNiB" crossorigin="anonymous">
+
+    <!-- Favicon links for various icon sizes -->
     <link rel="apple-touch-icon" sizes="57x57" href="assets/favicon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="assets/favicon/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="assets/favicon/apple-icon-72x72.png">
@@ -17,26 +24,38 @@
     <link rel="apple-touch-icon" sizes="144x144" href="assets/favicon/apple-icon-144x144.png">
     <link rel="apple-touch-icon" sizes="152x152" href="assets/favicon/apple-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-icon-180x180.png">
+
+    <!-- Favicon links for various icon sizes -->
     <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/android-icon-192x192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="assets/favicon/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+
+    <!-- Link to the manifest file for a progressive web app -->
     <link rel="manifest" href="assets/favicon/manifest.json">
+
+    <!-- Meta tags for Microsoft application compatibility -->
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="assets/favicon/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
+
     <!-- Vendors styles-->
     <link rel="stylesheet" href="vendors/simplebar/css/simplebar.css">
     <link rel="stylesheet" href="css/vendors/simplebar.css">
+
     <!-- Main styles for this application-->
     <link href="css/style.css" rel="stylesheet">
+
     <!-- We use those styles to show code examples, you should remove them in your application.-->
     <link href="css/examples.css" rel="stylesheet">
+
     <!-- Leaflet Maps.-->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
-    <title>Stray Cat Feeding System</title>
+
+    <!-- Page title -->
+    <title>Admin Dashboard</title>
 </head>
 
 <style>
@@ -82,6 +101,7 @@ h2 {
   margin-top: 1rem;
 }
 
+/* Styling for the location list */
 #location-list li {
   background: #f7f7f7;
   border: 1px solid #ddd;
@@ -89,6 +109,7 @@ h2 {
   margin-bottom: 0.5rem;
 }
 
+/* Styling for sections such as about us and sign up */
 .about-us,
 .signup-section {
   margin-bottom: 2rem;
@@ -98,21 +119,26 @@ h2 {
   border-radius: 0.25rem;
 }
 
+/* Heading styling for the about us and sign up sections */
 .about-us h2,
 .signup-section h3 {
   margin-top: 0;
 }
 
+  /* Map styling */
   #map {
     width: 45%; /* Responsive width */
     height: 400px; /* Fixed height, adjust as necessary */
     margin-top: 1rem; /* Add some space above the map */
   }
-    nav {
+
+  /* Navigation bar styling */
+  nav {
     background-color: #3c40ff;
     overflow: hidden;
   }
 
+  /* Navigation link styling */
   nav a {
     float: left;
     display: block;
@@ -122,6 +148,7 @@ h2 {
     text-decoration: none;
   }
 
+  /* Hover effect for navigation links */
   nav a:hover {
     background-color: #ddd;
     color: blue;
@@ -131,26 +158,39 @@ h2 {
 <body class="c-app">
   <!-- CoreUI Header --> 
   <header class="c-header c-header-light c-header-fixed">
+  
+  <!-- Navigation links -->
   <ul class="nav nav-pills">
-  <li class="nav-item">
-    <a class="nav-link active" aria-current="page" href="/">Home</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="/dashboard">Dashboard</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="/reports">Reports</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="notifications">Notifications</a>
-  </li>
-
+    <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="/">Home</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/locations">Locations</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/posts">Posts</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/about">About Us</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/reports">Reports</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/notifications">Notifications</a>
+    </li>
+    <li class="nav-item">
+      <a href="/logout" class="nav-link">Log Out</a>
+    </li>
 </ul>
 </header>
-  
+
+<!-- Main application body -->
 <div class="c-body">
   <main class="c-main">
+    <!-- Container for the main content -->
     <div class="container-fluid">
+      <!-- Row for content -->
       <div class="row">
         <!-- About Us and Sign Up Column -->
         <div class="col-md-6">

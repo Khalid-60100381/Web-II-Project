@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Include Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for modal -->
+  <style>
+    /* Styling the modal header */
+    .modal-header {
+      background-color: #007bff; /* Bootstrap primary color */
+      color: white;
+      padding: 10px 15px;
+    }
+
+    /* Styling the modal body */
+    .modal-body {
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* Styling the modal footer */
+    .modal-footer {
+      display: flex;
+      justify-content: space-between; /* Align buttons evenly */
+      padding: 10px 15px;
+    }
+
+    /* Button styles */
+    .btn-secondary {
+      background-color: #007bff; /* Bootstrap primary color */
+      border-color: #007bff;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Bootstrap Modal for greeting the user -->
+  <div class="modal fade" id="greetModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <!-- Modal header with title and close button -->
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Greetings</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <!-- Modal body to display welcome message -->
+        <div class="modal-body">
+          {{welcomeBackMessage}}
+        </div>
+        <!-- Modal footer with action button -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Take me to my dashboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include jQuery and Bootstrap JavaScript dependencies -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script to handle modal trigger and redirection based on user role -->
+  <script>
+  {{#if welcomeBackMessage}}
+    $(document).ready(function() {
+      // Show the greetModal if welcomeBackMessage is present
+      $('#greetModal').modal('show');
+      
+      // Event listener for when the modal is hidden
+      $('#greetModal').on('hidden.bs.modal', function() {
+        // Redirect the user to the intended route based on user role
+        {{#if userIsMember}}
+            window.location.href = '/member-page';
+        {{/if}}
+
+        {{#if userIsAdmin}}
+            window.location.href = '/admin-page';
+        {{/if}}
+      });
+    });
+  {{/if}}
+  </script>
+
+</body>
+</html>

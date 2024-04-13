@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Character encoding and compatibility settings -->
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Viewport settings for responsive design -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Page metadata for search engines -->
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+
+    <!-- CoreUI CSS and additional vendor stylesheets -->
     <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@4.3.2/dist/css/coreui.min.css" rel="stylesheet" integrity="sha384-H8oVKJOQVGGCdfFNM+9gLKN0xagtq9oiNLirmijheEuqD3kItTbTvoOGgxVKqNiB" crossorigin="anonymous">
+
+    <!-- Apple touch icons for mobile devices -->
     <link rel="apple-touch-icon" sizes="57x57" href="assets/favicon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="assets/favicon/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="assets/favicon/apple-icon-72x72.png">
@@ -17,28 +26,36 @@
     <link rel="apple-touch-icon" sizes="144x144" href="assets/favicon/apple-icon-144x144.png">
     <link rel="apple-touch-icon" sizes="152x152" href="assets/favicon/apple-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-icon-180x180.png">
+
+    <!-- Favicon for various sizes -->
     <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/android-icon-192x192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="assets/favicon/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
     <link rel="manifest" href="assets/favicon/manifest.json">
+
+    <!-- Microsoft-specific settings for Windows Tiles -->
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="assets/favicon/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
+
     <!-- CSS -->
     <!-- Vendors styles-->
     <link rel="stylesheet" href="vendors/simplebar/css/simplebar.css">
     <link rel="stylesheet" href="css/vendors/simplebar.css">
+
     <!-- Main styles for this application-->
     <link href="css/style.css" rel="stylesheet">
+
     <!-- We use those styles to show code examples, you should remove them in your application.-->
     <link href="css/examples.css" rel="stylesheet">
+    
     <!-- Leaflet Maps.-->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
   
-    <title>About us</title>
+    <title>About Us</title>
 </head>
 <style>
   /* Base layout styles */
@@ -196,6 +213,7 @@
   <!-- CoreUI Header --> 
 <header class="c-header c-header-light c-header-fixed">
     <div class="container">
+      <!-- Navigation with links -->
         <ul class="nav nav-pills justify-content-center">
             <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="/">Home</a>
@@ -206,35 +224,48 @@
             <li class="nav-item">
                 <a class="nav-link" href="/locations">Locations</a>
             </li>
-            <li class="nav-item">
-                <a href="/login" class="nav-link">Login</a>
-            </li>
-            <li class="nav-item">
-                <a href="/register" class="nav-link">Register</a>
-            </li>
+            <!-- Conditional content for different user roles -->
+            {{#logicalAND userIsMember userIsAdmin}}
+              <li class="nav-item">
+                  <a href="/login" class="nav-link">Login</a>
+              </li>
+              <li class="nav-item">
+                  <a href="/register" class="nav-link">Register</a>
+              </li>
+            {{/logicalAND}}
             {{#if userIsMember}}
               <li class="nav-item">
                 <a href="/member-page" class="nav-link">Member Dashboard</a>
+              </li>
+              <li class="nav-item">
+                <a href="/logout" class="nav-link">Log Out</a>
               </li>
             {{/if}}
             {{#if userIsAdmin}}
               <li class="nav-item">
                 <a href="/admin-page" class="nav-link">Admin Dashboard</a>
               </li>
+              <li class="nav-item">
+                <a href="/logout" class="nav-link">Log Out</a>
+              </li>
             {{/if}}
         </ul>
     </div>
+    <!-- GIF Embed -->
     <div class="tenor-gif-embed" data-postid="7879487544165061347" data-share-method="host" data-aspect-ratio="1.29032" data-width="25%">
         <a href="https://tenor.com/view/pat-extasyxx-extase-gif-7879487544165061347">Pat Extasyxx GIF</a>
         from <a href="https://tenor.com/search/pat-gifs">Pat GIFs</a>
     </div> 
+    <!-- Tenor Embed Script -->
     <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 </header>
 
+<!-- Main Content Section -->
 <div class="c-body">
   <main class="c-main">
     <div class="container-fluid">
       <div class="row">
+        <!-- Content for different sections -->
         <h2 class="locations-header">Compassion In Action: Nurturing Qatar's Stray Cats</h2>
             <p>
                 At the heart of our initiative lies a simple yet powerful inspiration: kindness. 
@@ -266,6 +297,8 @@
                 overlooked members of our society. Join us as we pave the way towards a brighter, more compassionate future for 
                 Qatar's stray cats. Together, we can transform the lives of stray cats in Qatar, one meal at a time.
             </p>
+            
+          <!-- Signup section -->
           <div class="signup-section">
             <h3>Interested in helping? Join us!</h3>
             <p>Become a part of our community and help support stray cats. Sign up today and get involved!</p>

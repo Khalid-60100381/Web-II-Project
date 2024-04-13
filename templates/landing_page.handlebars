@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Set character encoding for the document -->
     <meta charset="UTF-8">
+
+    <!-- Compatibility settings for different browsers -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Responsive design settings for various screen sizes -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Meta descriptions for SEO purposes -->
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+
+    <!-- Link to CoreUI stylesheet hosted on CDN -->
     <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@4.3.2/dist/css/coreui.min.css" rel="stylesheet" integrity="sha384-H8oVKJOQVGGCdfFNM+9gLKN0xagtq9oiNLirmijheEuqD3kItTbTvoOGgxVKqNiB" crossorigin="anonymous">
+
+    <!-- Apple touch icon links -->
     <link rel="apple-touch-icon" sizes="57x57" href="assets/favicon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="assets/favicon/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="assets/favicon/apple-icon-72x72.png">
@@ -17,43 +28,59 @@
     <link rel="apple-touch-icon" sizes="144x144" href="assets/favicon/apple-icon-144x144.png">
     <link rel="apple-touch-icon" sizes="152x152" href="assets/favicon/apple-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-icon-180x180.png">
+
+    <!-- Icons for Android devices -->
     <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/android-icon-192x192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="assets/favicon/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+
+    <!-- Manifest file for Progressive Web App functionality -->
     <link rel="manifest" href="assets/favicon/manifest.json">
+
+    <!-- Microsoft application specific meta tags -->
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="assets/favicon/ms-icon-144x144.png">
+
+    <!-- Theme color for mobile browsers -->
     <meta name="theme-color" content="#ffffff">
+
     <!-- CSS -->
     <!-- Vendors styles-->
     <link rel="stylesheet" href="vendors/simplebar/css/simplebar.css">
     <link rel="stylesheet" href="css/vendors/simplebar.css">
+
     <!-- Main styles for this application-->
     <link href="css/style.css" rel="stylesheet">
+
     <!-- We use those styles to show code examples, you should remove them in your application.-->
     <link href="css/examples.css" rel="stylesheet">
+
     <!-- Leaflet Maps.-->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
   
-    <title>Stray Cat Feeding System</title>
+    <title>Landing Page</title>
 </head>
 <style>
   /* Base layout styles */
+
+  /* Container fluid layout for proper padding and max width */
     .container-fluid {
     padding: 2rem;
     max-width: 1200px;
     margin: auto;
   }
 
+  /* Row layout for responsiveness */
   .row {
     display: flex;
     flex-wrap: wrap;
     margin: 0 -15px; /* Gutter for row */
   }
 
+  /* Column layout for responsiveness */
   .col-md-6 {
     flex: 0 0 50%;
     max-width: 50%;
@@ -80,6 +107,7 @@
     margin-top: 1rem;
   }
 
+  /* Locations list styling */
   #location-list li {
     background: #ffffff;
     border: 1px solid #dadee4;
@@ -99,6 +127,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
   }
 
+  /* Info section headers */
   .info-section h2,
   .info-section h3 {
     color: #333;
@@ -107,11 +136,13 @@
     margin-bottom: 1rem;
   }
 
+  /* Info section paragraph styling */
   .info-section p {
     color: #555;
     line-height: 1.6; /* Improved readability */
   }
 
+  /* Button styling */
   .info-section .btn {
     margin-top: 1rem;
   }
@@ -123,6 +154,7 @@
     padding: 0.5rem 0; /* Vertical padding */
   }
 
+  /* Navigation link styles */
   nav a {
     float: left;
     display: block;
@@ -133,17 +165,17 @@
     transition: background-color 0.3s ease; /* Smooth transition for hover */
   }
 
+  /* Navigation link hover state */
   nav a:hover {
     background-color: #3a47b5; /* Hover state color */
     color: #eaeaea;
   }
+
   .container-fluid {
     padding: 2rem;
     max-width: 1200px;
     margin: auto;
   }
-
-  /* ... Your other styles ... */
 
   /* Flex container for side by side alignment */
   .info-container {
@@ -180,11 +212,13 @@
     }
   }
 
+  /* Navigation padding adjustments for smaller screens */
   @media (max-width: 767.98px) {
     nav a {
       padding: 10px;
     }
   }
+    /* Additional responsive adjustments */
     @media (max-width: 768px) {
     .info-container {
       flex-direction: column;
@@ -196,11 +230,14 @@
       flex: 0 0 100%;
     }
   }
+
+  /* Header styles */
   .website-header {
     text-align: center; /* Centers the text horizontally */
     margin: 1rem 0; /* Adds some space above and below the header */
   }
 
+  /* Header title styles */
   .website-header h1 {
     font-size: 2.5rem; /* Large font size for the header */
     color: #000; /* Black color text */
@@ -211,47 +248,59 @@
 </style>
 
 <body class="c-app">
+  <!-- Header for the website -->
   <div class="website-header">
     <h1>Stray Cat Locator</h1>
   </div>
   <!-- CoreUI Header --> 
 <header class="c-header c-header-light c-header-fixed">
     <div class="container">
+        <!-- Navigation Links -->
         <ul class="nav nav-pills justify-content-center">
-            <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/posts">Posts</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/locations">Locations</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/about">About Us</a>
-            </li>
+          <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/posts">Posts</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="/locations">Locations</a>
+          </li>
+          <!-- Display login and register links only if the user is not a member or admin -->
+          {{#logicalAND userIsMember userIsAdmin}}
             <li class="nav-item">
                 <a href="/login" class="nav-link">Login</a>
             </li>
             <li class="nav-item">
                 <a href="/register" class="nav-link">Register</a>
             </li>
-            {{#if userIsMember}}
-              <li class="nav-item">
-                <a href="/member-page" class="nav-link">Member Dashboard</a>
-              </li>
-            {{/if}}
-            {{#if userIsAdmin}}
-              <li class="nav-item">
-                <a href="/admin-page" class="nav-link">Admin Dashboard</a>
-              </li>
-            {{/if}}
+          {{/logicalAND}}
+          <!-- Display member dashboard and logout links if the user is a member -->
+          {{#if userIsMember}}
+            <li class="nav-item">
+              <a href="/member-page" class="nav-link">Member Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a href="/logout" class="nav-link">Log Out</a>
+            </li>
+          {{/if}}
+          <!-- Display admin dashboard and logout links if the user is an admin -->
+          {{#if userIsAdmin}}
+            <li class="nav-item">
+              <a href="/admin-page" class="nav-link">Admin Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a href="/logout" class="nav-link">Log Out</a>
+            </li>
+          {{/if}}
         </ul>
     </div>
 </header>
 
+<!-- Main Content -->
 <div class="c-body">
   <main class="c-main">
     <div class="container-fluid">
       <!-- Render the dynamic map -->
       <div class="row">
+        <!-- Map Rendering -->
         {{> map }}
         <!-- About Us and Sign Up Column -->
         <div class="info-container">
@@ -274,6 +323,8 @@
   <!-- CoreUI Scripts -->
   <script src="vendors/@coreui/coreui/js/coreui.bundle.min.js"></script>
   <script src="vendors/simplebar/js/simplebar.min.js"></script>
+  
+  <!-- Leaflet Library for Map Rendering -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>

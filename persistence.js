@@ -49,9 +49,9 @@ async function checkEmailExists(emailInput){
     let userDetails = await users.findOne({"userDetails.email":emailInput})
     // Check if an existing user already has an identical email in the database
     if (userDetails === null){
-        return true
+        return false
     }
-    return false
+    return true
 }
 
 /**

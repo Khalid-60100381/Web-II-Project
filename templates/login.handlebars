@@ -7,15 +7,25 @@
 -->
 <html lang="en">
   <head>
+    <!-- Base URL for relative paths -->
     <base href="./">
+    
+    <!-- Character encoding and compatibility settings -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Viewport settings for responsive design -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+
+    <!-- Page metadata for search engines -->
     <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
     <meta name="author" content="Łukasz Holeczek">
     <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
-    <title>Login</title>
+
+    <!-- CoreUI CSS and additional vendor stylesheets -->
     <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@4.3.2/dist/css/coreui.min.css" rel="stylesheet" integrity="sha384-H8oVKJOQVGGCdfFNM+9gLKN0xagtq9oiNLirmijheEuqD3kItTbTvoOGgxVKqNiB" crossorigin="anonymous">
+
+    <!-- Apple touch icons for mobile devices -->
     <link rel="apple-touch-icon" sizes="57x57" href="assets/favicon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="assets/favicon/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="assets/favicon/apple-icon-72x72.png">
@@ -25,24 +35,43 @@
     <link rel="apple-touch-icon" sizes="144x144" href="assets/favicon/apple-icon-144x144.png">
     <link rel="apple-touch-icon" sizes="152x152" href="assets/favicon/apple-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-icon-180x180.png">
+
+    <!-- Favicon for various sizes -->
     <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/android-icon-192x192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="assets/favicon/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
     <link rel="manifest" href="assets/favicon/manifest.json">
+
+    <!-- Microsoft-specific settings for Windows Tiles -->
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="assets/favicon/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
+
     <!-- Vendors styles-->
     <link rel="stylesheet" href="vendors/simplebar/css/simplebar.css">
     <link rel="stylesheet" href="css/vendors/simplebar.css">
+
     <!-- Main styles for this application-->
     <link href="css/style.css" rel="stylesheet">
+
     <!-- We use those styles to show code examples, you should remove them in your application.-->
     <link href="css/examples.css" rel="stylesheet">
-  </head>
-  <body>
 
+    <!-- Page title -->
+    <title>Log In</title>
+  </head>
+
+  <!-- Inline style to center form elements -->
+  <style>
+    .col-6 {
+      display: flex;
+      justify-content: center;
+      margin: auto;
+      margin-top: 5em;
+    }
+  </style>
+  <body>
     <!-- If the user has just registered an account, then display that the account registration is successful, and that
     he may proceed to log in at the login page -->
     {{#if registrationConfirmation}}
@@ -76,28 +105,35 @@
         {{unauthorizedAccess}}
       </div>
     {{/if}}
+
+    <!-- Login page container -->
     <div class="bg-light min-vh-100 d-flex flex-row align-items-center">
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-lg-8">
             <div class="card-group d-block d-md-flex row">
+              <!-- Login form card -->
               <div class="card col-md-7 p-4 mb-0">
                 <div class="card-body">
-                  <h1>Login</h1>
+                  <h1>Log In</h1>
                   <p class="text-medium-emphasis">Sign In to your account</p>
+                  <!-- Login form -->
                   <form action="/login" method="POST">
+                    <!-- Username input field -->
                     <div class="input-group mb-3"><span class="input-group-text">
                         <svg class="icon">
                           <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-user"></use>
                         </svg></span>
                       <input class="form-control" type="text" placeholder="Username" name="usernameInput">
                     </div>
+                    <!-- Password input field -->
                     <div class="input-group mb-4"><span class="input-group-text">
                         <svg class="icon">
                           <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-lock-locked"></use>
                         </svg></span>
                       <input class="form-control" type="password" placeholder="Password" name="passwordInput">
                     </div>
+                    <!-- Login and Forgot Password buttons -->
                     <div class="row">
                       <div class="col-6">
                         <button class="btn btn-primary px-4" type="submit">Login</button>
@@ -109,6 +145,7 @@
                   </form>
                 </div>
               </div>
+              <!-- Sign-up card -->
               <div class="card col-md-5 text-white bg-primary py-5">
                 <div class="card-body text-center">
                   <div>
@@ -121,6 +158,12 @@
                 </div>
               </div>
             </div>
+            <!-- Back to landing page form -->
+            <form action="/" method="GET">
+              <div class="col-6">
+                <button class="btn btn-primary btn-lg mt-3" type="submit">Back to Landing Page</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -128,8 +171,6 @@
     <!-- CoreUI and necessary plugins-->
     <script src="vendors/@coreui/coreui/js/coreui.bundle.min.js"></script>
     <script src="vendors/simplebar/js/simplebar.min.js"></script>
-    <script>
-    </script>
 
   </body>
 </html>

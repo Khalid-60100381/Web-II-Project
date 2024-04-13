@@ -1,3 +1,4 @@
+// Importing necessary modules for business layer functionalities
 const session_management = require("./business_layer/session_management.js")
 const registration_form_validation = require("./business_layer/registration_form_validation.js")
 const account_registration = require("./business_layer/account_registration")
@@ -8,24 +9,38 @@ const login_form_validation = require("./business_layer/login_form_validation.js
 const authorization = require("./business_layer/authorization.js")
 const csrf_protection = require("./business_layer/csrf_protection.js")
 
+// Importing required packages for Express application
 const express = require('express')
 const {engine} = require('express-handlebars')
+const handlebars = require('handlebars')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 
+// Initializing Express application and handelbars engine and templates directory
 const app = express()
 app.set ('views', __dirname+"/templates")
 app.set('view engine', 'handlebars')
 
+// Registering custom Handlebars helper function for logical AND comparison
+handlebars.registerHelper('logicalAND', function(v1, v2, options) {
+    if(v1 === v2) {
+      return options.fn(this);
+    }
+    return options.inverse(this);
+})
+
+// Configuring the Handlebars engine for the Express application
 app.engine('handlebars', engine({
     partialsDir: __dirname + '/templates/partials',
     helpers: { //Helper function to stringfy the location data in handlebars
         json: function(context){
             return JSON.stringify(context)
-        }
+        },
+        logicalAND: handlebars.helpers.logicalAND
     }
-  }))
+}))
 
+// Adding middleware for parsing URL-encoded bodies and cookies
 app.use(bodyParser.urlencoded())
 app.use(cookieParser())
 
@@ -201,8 +216,6 @@ app.get("/register", async (req, res) => {
         return
     }
 
-    //
-    //let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
     //If the current user's session passes all session validation, then render the register form
     res.render("register", {
         layout:undefined
@@ -211,6 +224,7 @@ app.get("/register", async (req, res) => {
 })
 
 app.get("/member-page", async (req, res) => {
+
     // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
@@ -238,10 +252,27 @@ app.get("/member-page", async (req, res) => {
         return
     }
 
-    //Get the Fixed Location List
+    // Check and Retrieve any flash messages that are part of the user's current session
+    let flashMessage = await flash_messages.getFlash(sessionID)
+
+    // Handling the flash message for welcoming back the user by rendering the user_login_alert template which displays
+    // the welcome back message, and redirects the user to the member page
+    if (flashMessage === `Welcome Back ${userSession.sessionData.username}!`){
+        let welcomeBackMessage = flashMessage
+
+        res.render("user_login_alert", {
+            layout:undefined,
+            welcomeBackMessage: welcomeBackMessage,
+            userIsMember: true
+        })
+
+        return
+    }
+
+    // Get the list of fixed locations and render the member page
     const fixed_locations = await location.getlocations()
 
-    return res.render("member_page",{
+    res.render("member_page",{
     layout:undefined,
     locations: fixed_locations        
     })
@@ -271,6 +302,23 @@ app.get("/admin-page", async (req, res) => {
     if (userSession.sessionData.role !== "admin"){
         await flash_messages.setFlash(userSession.sessionID, "Please log in to your account.")
         res.redirect("/login")
+
+        return
+    }
+
+    // Check and Retrieve any flash messages that are part of the user's current session
+    let flashMessage = await flash_messages.getFlash(sessionID)
+
+    // Handling the flash message for welcoming back the user by rendering the user_login_alert template which displays
+    // the welcome back message, and redirects the user to the admin page
+    if (flashMessage === `Welcome Back ${userSession.sessionData.username}!`){
+        let welcomeBackMessage = flashMessage
+
+        res.render("user_login_alert", {
+            layout:undefined,
+            welcomeBackMessage: welcomeBackMessage,
+            userIsAdmin: true
+        })
 
         return
     }
@@ -313,6 +361,7 @@ app.post("/login", async (req, res) => {
         })
     }
 
+    // Authenticate the user's login credentials against the database credentials
     let result = await authentication.authenticateLogin(usernameInput, passwordInput)
 
     // If the user-inputted credentials are incorrect, then set a flash message telling the user that either the username
@@ -331,7 +380,10 @@ app.post("/login", async (req, res) => {
 
     if (userRole === "member"){
         userSession.sessionData.role = "member"
+        userSession.sessionData.username = usernameInput
         await session_management.updateSession(sessionID, userSession)
+
+        await flash_messages.setFlash(userSession.sessionID, `Welcome Back ${usernameInput}!`)
         res.redirect("/member-page")
 
         return
@@ -339,7 +391,10 @@ app.post("/login", async (req, res) => {
 
     if (userRole === "admin"){
         userSession.sessionData.role = "admin"
+        userSession.sessionData.username = usernameInput
         await session_management.updateSession(sessionID, userSession)
+
+        await flash_messages.setFlash(userSession.sessionID, `Welcome Back ${usernameInput}!`)
         res.redirect("admin-page")
 
         return
@@ -348,6 +403,7 @@ app.post("/login", async (req, res) => {
 })
 
 app.post("/register", async (req, res) => {
+    // Retrieve all user field inputs from the registration form fields
     let firstnameInput = req.body.firstnameInput
     let lastnameInput = req.body.lastnameInput
     let emailInput = req.body.emailInput
@@ -355,9 +411,10 @@ app.post("/register", async (req, res) => {
     let passwordInput = req.body.passwordInput
     let repeatPasswordInput = req.body.repeatPasswordInput
 
+    // Check if the user-inputted passwords match
     let passwordsMatch = await registration_form_validation.checkPasswordMatch(passwordInput, repeatPasswordInput)
 
-    // Check if passwords match
+    //If passwords do not match
     if (!passwordsMatch) {
         return res.render("register", { 
             layout: undefined, 
@@ -371,9 +428,10 @@ app.post("/register", async (req, res) => {
         })
     }
 
+    //Check if any empty fields exist (including whitespace characters)
     let emptyFields = await registration_form_validation.checkEmptyFields(firstnameInput, lastnameInput, emailInput, usernameInput, passwordInput, repeatPasswordInput)
 
-    //Check if any empty fields exist (including whitespace characters)
+    // If any empty fields exist
     if (emptyFields) {
         return res.render("register", { 
             layout: undefined, 
@@ -392,6 +450,7 @@ app.post("/register", async (req, res) => {
     firstnameInput = firstnameInput.trim()
     lastnameInput = lastnameInput.trim()
 
+    // Validate if firstname and lastname consist of letters only
     let firstnameLastnameValidated = await registration_form_validation.validateFirstnameLastname(firstnameInput, lastnameInput)
 
     //If firstname or lastname does not consist of letters only
@@ -419,10 +478,7 @@ app.post("/register", async (req, res) => {
     // and special character
     let passwordComplexityValidated = await registration_form_validation.validatePasswordComplexity(passwordInput)
 
-    //Commented out for potential future use if password-validator package is not permitted
-    //let passwordComplexity = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/
-
-    //If user password meets password requirements
+    //If user password does not meet password complexity requirements
     if (!passwordComplexityValidated) {
         return res.render("register", { 
             layout: undefined, 
@@ -443,13 +499,13 @@ app.post("/register", async (req, res) => {
         })
     }
 
+    //Before username validation, remove any leading or trailing whitespaces from username
     usernameInput = usernameInput.trim()
+
     //Check that username starts with an alphabetic character, does not contain spaces or “@”, is between 6 and 30 
     // characters (both inclusive), and contains only valid Unix Characters (uppercase and lowercase letters, numbers, 
     // “-”, “.”, and “_”
     let usernameValidated = await registration_form_validation.validateUsername(usernameInput)
-    let emailValidated = await registration_form_validation.validateEmail(emailInput)
-
 
     //If username does not meet criteria
     if (!usernameValidated){
@@ -470,6 +526,9 @@ app.post("/register", async (req, res) => {
             repeatPasswordInput: repeatPasswordInput
         })
     }
+
+    //Validates the email format of user-inputted email
+    let emailValidated = await registration_form_validation.validateEmail(emailInput)
 
     //If email does not meet criteria
     if (!emailValidated){
@@ -526,13 +585,14 @@ app.post("/register", async (req, res) => {
     let userDetails = {
         firstname: firstnameInput,
         lastname: lastnameInput,
+        email: emailInput,
         username: usernameInput,
         password: passwordInput,
         role:"member"
     }
 
     
-    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    // Retrieve the current user session from the database using the sessionID stored in the browser cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
 
@@ -595,14 +655,43 @@ app.get("/about", async (req, res) => {
     })
 })
 
+app.get("/logout", async (req, res) => {
+    // Retrieve the current user's session ID from the cookie value, then check if the user's current sessionID 
+    // corresponds to an existing user session in the database
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the user session in the database does not exist, or the browser cookie does not exist, then clear the browser
+    // cookie
+    if (!userSession || !sessionID) {
+        res.clearCookie("sessionID")
+    }
+
+    // If the browser cookie exists, and the user session in the database exists as well, then delete the user session 
+    // from the database, and clear the browser cookie
+    if (sessionID && userSession) {
+        await session_management.deleteSession(sessionID)
+        res.clearCookie("sessionID")
+    }
+
+    // Render the user_logout_alert template which displays the logout message to confirm that the user has logged out of 
+    // his account successfully, and redirects the user to the landing page
+    res.render("user_logout_alert", {
+        layout: undefined
+    })
+})
+
 async function error404(req, res){
+    // Render the 404 page if the user tries to access a route that does not exist
     res.status(404).render("404", {
         layout: undefined
     })
 }
 
+// Middleware for handling 404 errors (page not found) 
 app.use(error404)
 
+// Start the Express application on port 8000 
 app.listen(8000, () => {
     console.log("Application started on port 8000")
 })

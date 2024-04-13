@@ -7,6 +7,7 @@ It is built using ExpressJS.
 The following packages were used in this project:
 - express
 - express-handlebars
+- handlebars
 - body-parser
 - cookie-parser
 - mongodb

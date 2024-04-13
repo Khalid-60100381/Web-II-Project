@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Include Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for modal -->
+  <style>
+    /* Styling the modal header */
+    .modal-header {
+      background-color: #007bff; /* Bootstrap primary color */
+      color: white;
+      padding: 10px 15px;
+    }
+
+    /* Styling the modal body */
+    .modal-body {
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* Styling the modal footer */
+    .modal-footer {
+      display: flex;
+      justify-content: space-between; /* Align buttons evenly */
+      padding: 10px 15px;
+    }
+
+    /* Button styles */
+    .btn-secondary {
+      background-color: #007bff; /* Bootstrap primary color */
+      border-color: #007bff;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Bootstrap Modal for user account logout confirmation -->
+  <div class="modal fade" id="greetModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <!-- Modal header with title and close button -->
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Greetings</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <!-- Modal body with a message -->
+        <div class="modal-body">
+          You have been successfully logged out. Thank you for visiting our site!
+        </div>
+        <!-- Modal footer with a button to go back to the landing page -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Back to Landing Page</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include jQuery and Bootstrap JavaScript dependencies -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script to trigger modal and handle user redirection -->
+  <script>
+    $(document).ready(function() {
+        // Display the greetModal on page load
+        $('#greetModal').modal('show')
+      
+        // Event listener for when the modal is hidden
+        $('#greetModal').on('hidden.bs.modal', function() {
+          
+            // Redirect the user to the landing page
+            window.location.href = '/'
+        })
+    })
+  </script>
+
+</body>
+</html>
