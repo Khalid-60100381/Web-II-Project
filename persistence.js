@@ -195,13 +195,13 @@ async function checkResetKey(resetKey) {
  */
 async function updateUserPassword(resetKey, newPassword) {
     await connectDatabase();
-    let user = await checkResetKey(resetKey);
-    let oldUser = await checkResetKey(resetKey); // Note: This line seems redundant since `user` already holds the value.
-    console.log(user);
+    let user = await checkResetKey(resetKey)
+    let oldUser = await checkResetKey(resetKey) // Note: This line seems redundant since `user` already holds the value.
+
     user.userDetails.password = newPassword;
     delete user.resetKey;
 
-    await users.replaceOne(oldUser, user);
+    await users.replaceOne(oldUser, user)
 }
 
 // Export functions for use by other modules

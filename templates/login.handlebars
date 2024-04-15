@@ -105,6 +105,11 @@
         {{unauthorizedAccess}}
       </div>
     {{/if}}
+    {{#if passwordResetSuccess}}
+      <div class="alert alert-success" role="alert">
+        {{passwordResetSuccess}}
+      </div>
+    {{/if}}
 
     <!-- Login page container -->
     <div class="bg-light min-vh-100 d-flex flex-row align-items-center">
@@ -139,7 +144,7 @@
                         <button class="btn btn-primary px-4" type="submit">Login</button>
                       </div>
                       <div class="col-6 text-end">
-                        <a href="/forgot" class="btn btn-link px-0">Forgot password?</a>
+                        <a href="/forgot-password" class="btn btn-link px-0">Forgot password?</a>
                       </div>
                     </div>
                   </form>

@@ -197,6 +197,25 @@ app.get("/login", async (req, res) => {
             unauthorizedAccess: unauthorizedAccess
         })
     }
+
+    if (flashMessage === "Session expired, Please reset your password again."){
+        let sessionExpiryError = flashMessage
+
+        res.render("login", {
+            layout: undefined,
+            sessionExpiryError: sessionExpiryError
+        })
+    }
+
+    if (flashMessage === "Password reset successfully."){
+        let passwordResetSuccess = flashMessage
+
+        res.render("login", {
+            layout: undefined,
+            passwordResetSuccess: passwordResetSuccess
+        })
+    
+    }
 })
 
 app.get("/register", async (req, res) => {
@@ -220,7 +239,6 @@ app.get("/register", async (req, res) => {
     //If the current user's session passes all session validation, then render the register form
     res.render("register", {
         layout:undefined
-        //csrfToken: csrfToken
     })
 })
 
@@ -682,81 +700,250 @@ app.get("/logout", async (req, res) => {
     })
 })
 
-//The forgot-password page, where the user enters his email
-app.get("/forgot", async(req, res) => {
-    let sessionID = req.cookies.sessionID
-    let flashMessage = await flash_messages.getFlash(sessionID)
 
-    //Checks if there is any flashMessages to display
-    if(!flashMessage){
-        res.render("forgot", {
-            layout: undefined
-        })
+app.get("/forgot-password", async(req, res) => {
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should register again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please reset your password again.")
+        res.redirect("/login")
+
         return
     }
-    
-    res.render("forgot", {
-        layout: undefined,
-        flashMessage: flashMessage
+
+    // Check and Retrieve any flash messages that are part of the user's current session
+    let flashMessage = await flash_messages.getFlash(sessionID)
+
+    // If a flash message exists storing the invalid email message coming from the POST /submit-email route, 
+    // then render the invalid email message as part of the forgot password page
+    if (flashMessage === "Email does not exist, Please check and try again."){
+        let invalidEmail = flashMessage
+
+        res.render("forgot_password", {
+            layout: undefined,
+            invalidEmail: invalidEmail
+        })
+
+        return
+    }
+
+    // If a flash message exists storing the email link sent message coming from the POST /submit-email route,
+    // then render the email link sent message as part of the forgot password page
+    if (flashMessage === "A link has been sent to your email, check console log to reset password."){
+        let emailLinkSent = flashMessage
+
+        res.render("forgot_password", {
+            layout: undefined,
+            emailLinkSent: emailLinkSent
+        })
+
+        return
+    }
+
+    // If a flash message exists storing the invalid reset key message coming from the POST /reset-password route,
+    // then render the invalid reset key message as part of the forgot password page
+    if (flashMessage === "Invalid reset key, Please enter your email again."){
+        let invalidResetKey = flashMessage
+
+        res.render("forgot_password", {
+            layout: undefined,
+            invalidResetKey: invalidResetKey
+        })
+
+        return
+    }
+
+    // If not flash messages exist, then render the forgot password page
+    res.render("forgot_password", {
+        layout: undefined
     })
     
 })
 
-//Email Submision, if the email exists a link will be generated with the reset key, displayed in the console log
-app.post("/submit-email", async(req, res) => {
-    let emailInput = req.body.emailInput
-    let emailExists = await registration_form_validation.checkEmailExists(emailInput)
 
-    if(!emailExists){
+app.post("/submit-email", async(req, res) => {
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should register again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
         let newUserSession = await session_management.startSession({role: "publicViewer"})
         res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
 
-        await flash_messages.setFlash(newUserSession.sessionID, "Email does not exist, Please check and try again")
-        res.redirect("/forgot")
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please reset your password again.")
+        res.redirect("/login")
+
         return
     }
+
+    // Get the user's email input from the form field, then check if the email exists in the database
+    let emailInput = req.body.emailInput
+    let emailExists = await registration_form_validation.checkEmailExists(emailInput)
+
+    // If the email does not exist in the database, then set a flash message telling the user that the email does not
+    // exist, and that he should check and try again, then redirect to the forgot password page
+    if(!emailExists){
+
+        await flash_messages.setFlash(userSession.sessionID, "Email does not exist, Please check and try again.")
+        res.redirect("/forgot-password")
+
+        return
+    }
+
+    // If the email exists in the database, then send a password reset link to the user's email, and set a flash message
+    // telling the user that a link has been sent to his email, then redirect to the forgot password page
     await passwordReset.resetPassword(emailInput)
-    let newUserSession = await session_management.startSession({role: "publicViewer"})
-    res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
-    await flash_messages.setFlash(newUserSession.sessionID, "An link has been sent check console log")
-    res.redirect("/forgot")
+    await flash_messages.setFlash(userSession.sessionID, "A link has been sent to your email, check console log to reset password.")
+
+
+    // Redirect to the forgot password page
+    res.redirect("/forgot-password")
 
 })
 
-//Display the new password setting page
-app.get('/reset-password', async (req, res) => {
-    let checkResetKey = await passwordReset.checkResetKey(req.query.key)
 
-    if (!checkResetKey) {
-        res.send("Invalid reset key")
+app.get('/reset-password', async (req, res) => {
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should register again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please reset your password again.")
+        res.redirect("/login")
+
         return
     }
 
+    // Check if the reset key exists in the database
+    let checkResetKey = await passwordReset.checkResetKey(req.query.key)
+
+    // If the reset key does not exist in the database, then set a flash message telling the user that the reset key is
+    // invalid, and that he should enter his email again, then redirect to the forgot password page
+    if (!checkResetKey) {
+        await flash_messages.setFlash(userSession.sessionID, "Invalid reset key, Please enter your email again.")
+        res.redirect("/forgot-password")
+
+        return
+    }
+
+    // If the reset key exists in the database, then render the reset password page
     res.render('reset_password', {
         layout: undefined,
         resetKey: req.query.key
     })
 })
 
-//Submit the new password, and delete the resest key from the db
+
 app.post('/reset-password', async (req, res) => {
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should register again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please reset your password again.")
+        res.redirect("/login")
+
+        return
+    }
+
+    // Get the new password, confirm new password, and reset key from the form fields
     let newPassword = req.body.newPassword
     let confirmNewPassword = req.body.confirmNewPassword
     let resetKey = req.body.resetKey
 
-    if (newPassword !== confirmNewPassword) {
-        res.send("Passwords do not match")
+    // Validate if user password length is 8 characters or more, and contains at least one uppercase, lowercase, digit, 
+    // and special character
+    let passwordComplexityValidated = await registration_form_validation.validatePasswordComplexity(newPassword)
+
+    // If the user password does not meet the password complexity requirements, then render the reset password page with
+    // an error message
+    if (!passwordComplexityValidated) {
+        res.render("reset_password", {
+            layout: undefined, 
+            errorMessage: `Password Requirements:
+                           - At least 8 characters
+                           - Contain at least one uppercase letter
+                           - Contain at least one lowercase letter
+                           - Contain at least one digit
+                           - Contain at least one symbol
+                           - Contain no whitespaces`,
+            resetKey: resetKey
+        })
+
         return
     }
 
+    // Check if the user's new password and the confirmed password fields match
+    let passwordsMatch = await registration_form_validation.checkPasswordMatch(newPassword, confirmNewPassword)
+
+    // If the user's new password and the confirmed password fields do not match, then render the reset password page
+    // with an error message
+    if (!passwordsMatch) {
+        res.render("reset_password", {
+            layout: undefined, 
+            errorMessage: "Passwords do not match.",
+            resetKey: resetKey
+        })
+
+        return
+    }
+
+    // Pass the new password and reset key to the password reset sub-layer to update the user's password in the database
+    // and set a flash message telling the user that the password has been reset successfully
     await passwordReset.setNewPassword(resetKey, newPassword)
-    res.redirect('/?message=Password reset successfully')
+    await flash_messages.setFlash(userSession.sessionID, "Password reset successfully.")
+
+    // Redirect to the login page
+    res.redirect("/login")
 })
 
 app.get('/logout', async (req, res) => {
-    await business.terminateSession(req.cookies.sessionID)
-    res.clearCookie('sessionID')
-    res.redirect('/')
+    // Retrieve the current user's session ID from the cookie value, then check if the user's current sessionID 
+    // corresponds to an existing user session in the database
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the user session in the database does not exist, or the browser cookie does not exist, then clear the browser
+    // cookie
+    if (!userSession || !sessionID) {
+        res.clearCookie("sessionID")
+    }
+
+    // If the browser cookie exists, and the user session in the database exists as well, then delete the user session 
+    // from the database, and clear the browser cookie
+    if (sessionID && userSession) {
+        await session_management.deleteSession(sessionID)
+        res.clearCookie("sessionID")
+    }
+
+    // Render the user_logout_alert template which displays the logout message to confirm that the user has logged out of 
+    // his account successfully, and redirects the user to the landing page
+    res.render("user_logout_alert", {
+        layout: undefined
+    })
 })
 
 async function error404(req, res){

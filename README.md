@@ -39,7 +39,7 @@ Visit the site using localhost on port 8000:
 
 # Member:
 > **User:** `member`  
-> **Password:** `Member@1234`
+> **Password:** `Member@123`
 
 ## Features
 # Milestone Submission (24/03/2024):
