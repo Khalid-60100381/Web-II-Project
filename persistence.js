@@ -154,6 +154,56 @@ async function getlocations(){
     return fixed_locations
 }
 
+/**
+ * Retrieves user details by email from the database.
+ * @param {string} email - The email address to search for in the user details.
+ * @returns {Promise<Object>} The user document if found, otherwise null.
+ */
+async function getUserDetailsByEmail(email) {
+    await connectDatabase();
+    let userEmail = await users.findOne({"userDetails.email": email});
+    return userEmail;
+}
+
+/**
+ * Updates the user details in the database.
+ * @param {Object} details - The user object containing updated details.
+ * @returns {Promise<void>} A promise that resolves with no value when the update completes.
+ */
+async function updateUserDetails(details) {
+    await connectDatabase();
+    let payload = await getUserDetailsByEmail(details.userDetails.email);
+    await users.replaceOne(payload, details);
+}
+
+/**
+ * Checks the database for a user with the specified reset key.
+ * @param {string} resetKey - The reset key to look up in the database.
+ * @returns {Promise<Object|null>} The user object if a reset key matches, otherwise null.
+ */
+async function checkResetKey(resetKey) {
+    await connectDatabase();
+    let result = await users.findOne({resetKey: resetKey});
+    return result;
+}
+
+/**
+ * Updates the user's password and removes the reset key from their document.
+ * @param {string} resetKey - The reset key associated with the user.
+ * @param {string} newPassword - The new password to set for the user.
+ * @returns {Promise<void>} A promise that resolves with no value when the password has been updated.
+ */
+async function updateUserPassword(resetKey, newPassword) {
+    await connectDatabase();
+    let user = await checkResetKey(resetKey);
+    let oldUser = await checkResetKey(resetKey); // Note: This line seems redundant since `user` already holds the value.
+    console.log(user);
+    user.userDetails.password = newPassword;
+    delete user.resetKey;
+
+    await users.replaceOne(oldUser, user);
+}
+
 // Export functions for use by other modules
 module.exports = {
     checkUsernameExists,
@@ -165,7 +215,11 @@ module.exports = {
     updateSession,
     findUserAccount,
     deleteSession,
-    getlocations
+    getlocations,
+    getUserDetailsByEmail,
+    checkResetKey,
+    updateUserPassword,
+    updateUserDetails,
 }
 
 

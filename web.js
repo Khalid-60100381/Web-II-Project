@@ -7,6 +7,7 @@ const location = require("./business_layer/location_management.js")
 const authentication = require("./business_layer/authentication.js")
 const login_form_validation = require("./business_layer/login_form_validation.js")
 const authorization = require("./business_layer/authorization.js")
+const passwordReset = require("./business_layer/password_reset.js")
 const csrf_protection = require("./business_layer/csrf_protection.js")
 
 // Importing required packages for Express application
@@ -679,6 +680,83 @@ app.get("/logout", async (req, res) => {
     res.render("user_logout_alert", {
         layout: undefined
     })
+})
+
+//The forgot-password page, where the user enters his email
+app.get("/forgot", async(req, res) => {
+    let sessionID = req.cookies.sessionID
+    let flashMessage = await flash_messages.getFlash(sessionID)
+
+    //Checks if there is any flashMessages to display
+    if(!flashMessage){
+        res.render("forgot", {
+            layout: undefined
+        })
+        return
+    }
+    
+    res.render("forgot", {
+        layout: undefined,
+        flashMessage: flashMessage
+    })
+    
+})
+
+//Email Submision, if the email exists a link will be generated with the reset key, displayed in the console log
+app.post("/submit-email", async(req, res) => {
+    let emailInput = req.body.emailInput
+    let emailExists = await registration_form_validation.checkEmailExists(emailInput)
+
+    if(!emailExists){
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Email does not exist, Please check and try again")
+        res.redirect("/forgot")
+        return
+    }
+    await passwordReset.resetPassword(emailInput)
+    let newUserSession = await session_management.startSession({role: "publicViewer"})
+    res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+    await flash_messages.setFlash(newUserSession.sessionID, "An link has been sent check console log")
+    res.redirect("/forgot")
+
+})
+
+//Display the new password setting page
+app.get('/reset-password', async (req, res) => {
+    let checkResetKey = await passwordReset.checkResetKey(req.query.key)
+
+    if (!checkResetKey) {
+        res.send("Invalid reset key")
+        return
+    }
+
+    res.render('reset_password', {
+        layout: undefined,
+        resetKey: req.query.key
+    })
+})
+
+//Submit the new password, and delete the resest key from the db
+app.post('/reset-password', async (req, res) => {
+    let newPassword = req.body.newPassword
+    let confirmNewPassword = req.body.confirmNewPassword
+    let resetKey = req.body.resetKey
+
+    if (newPassword !== confirmNewPassword) {
+        res.send("Passwords do not match")
+        return
+    }
+
+    await passwordReset.setNewPassword(resetKey, newPassword)
+    res.redirect('/?message=Password reset successfully')
+})
+
+app.get('/logout', async (req, res) => {
+    await business.terminateSession(req.cookies.sessionID)
+    res.clearCookie('sessionID')
+    res.redirect('/')
 })
 
 async function error404(req, res){

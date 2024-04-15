@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+    <!-- CoreUI CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@coreui/coreui/dist/css/coreui.min.css">
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <strong>Password Reset</strong>
+                    </div>
+                    <div class="card-body">
+                        {{#if flashMessage}}
+                        <div>
+                            {{flashMessage}}
+                        </div>
+                        {{/if}}
+                        <form action="/submit-email" method="POST">
+                            <div class="mb-3">
+                                <label for="email" class="form-label" >Email address</label>
+                                <input type="email" class="form-control" id="email" name="emailInput" placeholder="name@example.com" required>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" type="submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CoreUI Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+</body>
+</html>
