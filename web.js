@@ -60,7 +60,7 @@ app.get("/", async (req, res) => {
         const fixed_locations = await location.getlocations()
 
         res.render("landing_page", {
-        layout:undefined,
+        layout: undefined,
         locations: fixed_locations
         })
 
@@ -341,9 +341,11 @@ app.get("/admin-page", async (req, res) => {
 
         return
     }
-
+    
+    const fixed_locations = await location.getlocations()
     res.render("admin_page",{
         layout:undefined,
+        locations: fixed_locations
     })
 })
 

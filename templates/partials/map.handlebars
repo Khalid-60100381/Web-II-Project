@@ -1,7 +1,7 @@
 <!-- Leaflet map container -->
           <div id="map"></div>
           <h2 class="locations-header">Locations:</h2>
-
+          {{> locations}} 
           <!-- Leaflet JavaScript, consider using HTTPS if available -->
           <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
           <script>
@@ -45,9 +45,3 @@
               
           </script>
           
-          <!-- Display the list of locations -->
-          <ul id="location-list">
-            {{#each locations}}
-            <li>{{this.name}}: {{this.info}}</li>
-            {{/each}}
-          </ul>
