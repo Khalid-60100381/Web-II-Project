@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Feeding Site</title>
+    <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui/dist/css/coreui.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-3">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button class="btn btn-primary" type="button" data-coreui-toggle="modal" data-coreui-target="#updateSiteModal">
+                <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/>
+                </svg>
+                CreatePost
+            </button>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="updateSiteModal" tabindex="-1" aria-labelledby="updateSiteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updateSiteModalLabel">Update Feeding Site Details</h5>
+                        <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form -->
+                        <form action="/posts" method="POST">
+                            <div class="mb-3">
+                                <label for="location_name" class="form-label">Location:</label>
+                                <select class="form-select" id="location_name" name="location_name" required>
+                                    <option value="" disabled selected>Select Location</option>
+                                    {{#each locations as |location|}}
+                                    <option value="{{location.name}}">{{location.name}}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="food_level" class="form-label">Food Level (%):</label>
+                                <input type="text" class="form-control" id="food_level" name="food_level" required pattern="\d+%">
+                            </div>
+                            <div class="mb-3">
+                                <label for="water_level" class="form-label">Water Level (%):</label>
+                                <input type="text" class="form-control" id="water_level" name="water_level" required pattern="\d+%">
+                            </div>
+                            <div class="mb-3">
+                                <label for="health_issue" class="form-label">Health Issue:</label>
+                                <select class="form-select" id="health_issue" name="health_issue" required>
+                                    <option value="none">None</option>
+                                    <option value="minor">Minor</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="number_of_cats" class="form-label">Number of Cats:</label>
+                                <input type="number" class="form-control" id="number_of_cats" name="number_of_cats" required min="0">
+                            </div>
+                            <fieldset class="mb-3">
+                                <legend>Critical Item Availability:</legend>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="letterbox" id="letterbox" value="true">
+                                    <label class="form-check-label" for="letterbox">Letterbox</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="food_bowl" id="food_bowl" value="true">
+                                    <label class="form-check-label" for="food_bowl">Food Bowl</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="water_bowl" id="water_bowl" value="true">
+                                    <label class="form-check-label" for="water_bowl">Water Bowl</label>
+                                </div>
+                            </fieldset>
+                            <button type="submit" class="btn btn-success">Update Details</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="container">
+    <!-- Posts section -->
+    <div class="row">
+        {{#each locations as |location|}}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    Feeding Station #{{location.user}}
+                </div>
+                <div class="card-body">
+                    <!-- Display Last Updated Time -->
+                    <p class="text-muted">Last Updated: {{formatLastUpdated location.lastUpdated}}</p>
+
+                    <h5 class="card-title">{{location.name}}</h5>
+                    <p class="card-text">{{location.info}}</p>
+                    <div class="mb-2">
+                        <label class="form-label">Food Level:</label>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{location.food_level}};" aria-valuenow="{{location.food_level}}" aria-valuemin="0" aria-valuemax="100">{{location.food_level}}</div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Water Level:</label>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{location.water_level}};" aria-valuenow="{{location.water_level}}" aria-valuemin="0" aria-valuemax="100">{{location.water_level}}</div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Number of Cats:</strong> {{location.cat_number}}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Health Issues:</strong> {{location.health_issue}}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Critical Items:</strong>
+                        <ul>
+                            <li>
+                                <span class="fw-semibold">LitterBox:</span>
+                                {{#if location.critical_item.letterbox}}
+                                <span>Available</span>
+                                {{else}}
+                                <span>Missing</span>
+                                {{/if}}
+                            </li>
+                            <li>
+                                <span class="fw-semibold">Food Bowl:</span>
+                                {{#if location.critical_item.food_bowl}}
+                                <span>Available</span>
+                                {{else}}
+                                <span>Missing</span>
+                                {{/if}}
+                            </li>
+                            <li>
+                                <span class="fw-semibold">Water Bowl:</span>
+                                {{#if location.critical_item.water_bowl}}
+                                <span>Available</span>
+                                {{else}}
+                                <span>Missing</span>
+                                {{/if}}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</div>
+
+
+
+    <!-- CoreUI JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+</body>
+</html>

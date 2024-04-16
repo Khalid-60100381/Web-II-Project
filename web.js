@@ -8,6 +8,7 @@ const authentication = require("./business_layer/authentication.js")
 const login_form_validation = require("./business_layer/login_form_validation.js")
 const authorization = require("./business_layer/authorization.js")
 const passwordReset = require("./business_layer/password_reset.js")
+const posts = require("./business_layer/posts.js")
 const csrf_protection = require("./business_layer/csrf_protection.js")
 
 // Importing required packages for Express application
@@ -29,6 +30,24 @@ handlebars.registerHelper('logicalAND', function(v1, v2, options) {
     }
     return options.inverse(this);
 })
+
+//Handlebars helper function to format last updated time
+handlebars.registerHelper('formatLastUpdated', function(lastUpdated) {
+    // Calculate the time difference between now and the last updated time
+    const currentTime = new Date();
+    const updatedTime = new Date(lastUpdated);
+    const timeDiffInSeconds = Math.floor((currentTime - updatedTime) / 1000);
+
+    // Format the time difference based on seconds, minutes, or hours
+    if (timeDiffInSeconds < 60) {
+        return `${timeDiffInSeconds} sec`;
+    } else if (timeDiffInSeconds < 3600) {
+        return `${Math.floor(timeDiffInSeconds / 60)} min`;
+    } else {
+        return `${Math.floor(timeDiffInSeconds / 3600)} hr`;
+    }
+});
+
 
 // Configuring the Handlebars engine for the Express application
 app.engine('handlebars', engine({
@@ -920,6 +939,36 @@ app.post('/reset-password', async (req, res) => {
 
     // Redirect to the login page
     res.redirect("/login")
+})
+
+app.get('/posts', async (req, res) => {
+    const dbPosts = await posts.getPosts()
+
+    res.render('posts',{
+        layout: undefined,
+        locations: dbPosts
+    })
+})
+
+app.post('/posts', async (req, res) => {
+    let userInput = {
+        name: req.body.location_name,
+        food_level: req.body.food_level,
+        water_level: req.body.water_level,
+        cat_number: req.body.number_of_cats, // Assuming this should be a number
+        health_issue: req.body.health_issue,
+        critical_item: {
+            letterbox: req.body.letterbox === 'true',
+            food_bowl: req.body.food_bowl === 'true',
+            water_bowl: req.body.water_bowl === 'true'
+        }
+    };
+    let updateResult = await posts.updateLocations(req.body.location_name, userInput)
+    await posts.insertPost(userInput)
+    if(!updateResult){
+        res.send("update failed")
+    }
+    res.redirect('/posts')
 })
 
 app.get('/logout', async (req, res) => {

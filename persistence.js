@@ -7,6 +7,7 @@ let db = undefined
 let users = undefined
 let sessions = undefined
 let locations = undefined
+let posts = undefined
 
 /**
  * Establishes a connection to the MongoDB database and assigns collections to global variables if not already established.
@@ -20,6 +21,7 @@ async function connectDatabase() {
         users = db.collection('users')
         sessions = db.collection('sessions')
         locations = db.collection('location_list')
+        posts = db.collection('posts')
     }
 }
 
@@ -154,6 +156,36 @@ async function getlocations(){
     return fixed_locations
 }
 
+async function getPosts(){
+    await connectDatabase()
+    const cursor = await posts.find() // Pointer to the object list 
+    const pulledPosts = await cursor.toArray(); // Turning the object list into an array to loop through in handlebar
+    return pulledPosts
+}
+
+async function insertPost(details){
+    await connectDatabase()
+    const result = await posts.insertOne(details);
+    return result
+}
+
+async function updateLocations(name, details){
+    await connectDatabase();
+    const query = { "name": name }
+    const update = {
+        $set: {
+            food_level: details.food_level,
+            water_level: details.water_level,
+            cat_number: details.cat_number,
+            health_issue: details.health_issue,
+            critical_item: details.critical_item,
+            lastUpdated: details.lastUpdated
+        }
+    }; // Note: This line seems redundant since `user` already holds the value.
+
+    await locations.updateOne(query, update)
+}
+
 /**
  * Retrieves user details by email from the database.
  * @param {string} email - The email address to search for in the user details.
@@ -173,7 +205,7 @@ async function getUserDetailsByEmail(email) {
 async function updateUserDetails(details) {
     await connectDatabase();
     let payload = await getUserDetailsByEmail(details.userDetails.email);
-    await users.replaceOne(payload, details);
+    await users.updateOne(payload, details);
 }
 
 /**
@@ -220,6 +252,9 @@ module.exports = {
     checkResetKey,
     updateUserPassword,
     updateUserDetails,
+    getPosts,
+    insertPost,
+    updateLocations
 }
 
 

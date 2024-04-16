@@ -9,9 +9,6 @@
                             <th class="text-center">Location</th>
                             <th>Food and Water Levels</th>
                             <th class="text-center"># of Cats</th>
-                            <th>Health Status</th>
-                            <th>Critical Items</th>
-                            <th></th>
                           </tr>
                         </thead>
                        <tbody>
@@ -46,16 +43,6 @@
                           </td>
                           <td class="text-center">
                             <div>{{locations.cat_number}}</div> <!-- Assuming you have a property like this -->
-                          </td>
-                          <td>
-                            <!-- Activity info, modify as needed -->
-                            <div class="small text-medium-emphasis">Health Issues:</div>
-                            <div class="fw-semibold">{{locations.health_issue}}</div> <!-- Assuming you store last update date -->
-                          </td>
-                          <td class="text-center">
-                            <div>{{locations.critical_item.letterbox}}</div>
-                            <div>{{locations.critical_item.food_bowl}}</div>
-                            <div>{{locations.critical_item.water_bowl}}</div>
                           </td>
                         </tr>
                         {{/each}}
