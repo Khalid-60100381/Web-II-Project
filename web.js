@@ -1195,6 +1195,7 @@ app.post("/change-profile-details", async (req, res) => {
     if (emailInput !== userAccount.userDetails.email) {
         //Validates the email format of user-inputted email
         let emailValidated = await registration_form_validation.validateEmail(emailInput)
+        console.log(emailValidated)
 
         //If email does not meet criteria
         if (!emailValidated){
@@ -1274,6 +1275,7 @@ app.post('/posts', async (req, res) => {
         await theFile.mv(`${__dirname}/uploads/${fileName}`)
 
         let userInput = {
+            username: userSession.sessionData.username,
             name: req.body.location_name,
             text_post: req.body.text_post,
             food_level: req.body.food_level,
@@ -1295,6 +1297,7 @@ app.post('/posts', async (req, res) => {
     }else{
 
         let userInput = {
+            username: userSession.sessionData.username,
             name: req.body.location_name,
             food_level: req.body.food_level,
             water_level: req.body.water_level,
