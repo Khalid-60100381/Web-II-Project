@@ -61,7 +61,7 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
   
-    <title>Landing Page</title>
+    <title>Welcome</title>
 </head>
 <style>
   /* Base layout styles */
@@ -257,6 +257,8 @@
     <div class="container">
         <!-- Navigation Links -->
         <ul class="nav nav-pills justify-content-center">
+          <!-- Display login and register links only if the user is not a member or admin -->
+          {{#noneAreTrue userIsMember userIsAdmin userIsPublicViewer}}
           <li class="nav-item">
               <a class="nav-link active" aria-current="page" href=#>Home</a>
           </li>
@@ -266,17 +268,24 @@
           <li class="nav-item">
             <a class="nav-link" href="/about">About Us</a>
           </li>
-          <!-- Display login and register links only if the user is not a member or admin -->
-          {{#logicalAND userIsMember userIsAdmin}}
             <li class="nav-item">
                 <a href="/login" class="nav-link">Login</a>
             </li>
             <li class="nav-item">
                 <a href="/register" class="nav-link">Register</a>
             </li>
-          {{/logicalAND}}
+          {{/noneAreTrue}}
           <!-- Display member dashboard and logout links if the user is a member -->
           {{#if userIsMember}}
+          <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/member-page">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/posts">Posts</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/about">About Us</a>
+          </li>
             <li class="nav-item">
               <a href="/member-page" class="nav-link">Member Dashboard</a>
             </li>
@@ -286,6 +295,15 @@
           {{/if}}
           <!-- Display admin dashboard and logout links if the user is an admin -->
           {{#if userIsAdmin}}
+          <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/admin-home">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/posts">Posts</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/about">About Us</a>
+          </li>
             <li class="nav-item">
               <a href="/admin-page" class="nav-link">Admin Dashboard</a>
             </li>

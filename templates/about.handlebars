@@ -207,55 +207,81 @@
 </style>
 
 <body class="c-app">
+  <!-- Header for the website -->
   <div class="website-header">
-    <h1>Learn More About Us</h1>
+    <h1>Stray Cat Locator</h1>
   </div>
   <!-- CoreUI Header --> 
 <header class="c-header c-header-light c-header-fixed">
     <div class="container">
-      <!-- Navigation with links -->
+        <!-- Navigation Links -->
         <ul class="nav nav-pills justify-content-center">
+          <!-- Display login and register links only if the user is not a member or admin -->
+          {{#noneAreTrue userIsMember userIsAdmin userIsPublicViewer}}
+          <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/posts">Posts</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href=#>About Us</a>
+          </li>
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/">Home</a>
+                <a href="/login" class="nav-link">Login</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="/posts">Posts</a>
+                <a href="/register" class="nav-link">Register</a>
             </li>
-            <!-- Conditional content for different user roles -->
-            {{#logicalAND userIsMember userIsAdmin}}
-              <li class="nav-item">
-                  <a href="/login" class="nav-link">Login</a>
-              </li>
-              <li class="nav-item">
-                  <a href="/register" class="nav-link">Register</a>
-              </li>
-            {{/logicalAND}}
-            {{#if userIsMember}}
-              <li class="nav-item">
-                <a href="/member-page" class="nav-link">Member Dashboard</a>
-              </li>
-              <li class="nav-item">
-                <a href="/logout" class="nav-link">Log Out</a>
-              </li>
-            {{/if}}
-            {{#if userIsAdmin}}
-              <li class="nav-item">
-                <a href="/admin-page" class="nav-link">Admin Dashboard</a>
-              </li>
-              <li class="nav-item">
-                <a href="/logout" class="nav-link">Log Out</a>
-              </li>
-            {{/if}}
+          {{/noneAreTrue}}
+          <!-- Display member dashboard and logout links if the user is a member -->
+          {{#if userIsMember}}
+          <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="/member-page">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/posts">Posts</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href=#>About Us</a>
+          </li>
+            <li class="nav-item">
+              <a href="/member-page" class="nav-link">Member Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a href="/logout" class="nav-link">Log Out</a>
+            </li>
+          {{/if}}
+          <!-- Display admin dashboard and logout links if the user is an admin -->
+          {{#if userIsAdmin}}
+          <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="/admin-home">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/posts">Posts</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href=#>About Us</a>
+          </li>
+            <li class="nav-item">
+              <a href="/admin-page" class="nav-link">Admin Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a href="/logout" class="nav-link">Log Out</a>
+            </li>
+          {{/if}}
         </ul>
+      <!-- GIF Embed -->
+      <div class="tenor-gif-embed" data-postid="7879487544165061347" data-share-method="host" data-aspect-ratio="1.29032" data-width="25%">
+          <a href="https://tenor.com/view/pat-extasyxx-extase-gif-7879487544165061347">Pat Extasyxx GIF</a>
+          from <a href="https://tenor.com/search/pat-gifs">Pat GIFs</a>
+      </div> 
     </div>
-    <!-- GIF Embed -->
-    <div class="tenor-gif-embed" data-postid="7879487544165061347" data-share-method="host" data-aspect-ratio="1.29032" data-width="25%">
-        <a href="https://tenor.com/view/pat-extasyxx-extase-gif-7879487544165061347">Pat Extasyxx GIF</a>
-        from <a href="https://tenor.com/search/pat-gifs">Pat GIFs</a>
-    </div> 
     <!-- Tenor Embed Script -->
     <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 </header>
+
+
 
 <!-- Main Content Section -->
 <div class="c-body">

@@ -34,12 +34,12 @@ app.set ('views', __dirname+"/templates")
 app.set('view engine', 'handlebars')
 
 // Registering custom Handlebars helper function for logical AND comparison
-handlebars.registerHelper('logicalAND', function(v1, v2, options) {
-    if(v1 === v2) {
+handlebars.registerHelper('noneAreTrue', function(v1, v2, v3, options) {
+    if (!v1 && !v2 && !v3) {
       return options.fn(this);
     }
     return options.inverse(this);
-})
+});
 
 handlebars.registerHelper('eq', function (val1, val2) {
     return val1 === val2;
@@ -383,10 +383,62 @@ app.get("/admin-page", async (req, res) => {
     }
     
     const fixed_locations = await location.getlocations()
-    res.render("admin_page",{
+    res.render("admin_dashboard",{
         layout:undefined,
         locations: fixed_locations
     })
+})
+
+app.get("/admin-home", async (req, res) => {
+        // Retrieve the current user session from the database using the sessionID stored in the cookie
+        let sessionID = req.cookies.sessionID
+        let userSession = await session_management.getSession(sessionID)
+    
+        // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+        // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+        // session has expired, and that he should register again, then redirect to the login page and exit the function
+        if (!sessionID || !userSession) {
+            let newUserSession = await session_management.startSession({role: "publicViewer"})
+            res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+    
+            await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please login again.")
+            res.redirect("/login")
+    
+            return
+        }
+    
+        // If the user tries to directly access a protected route (/admin-page) and the user's session data indicates that 
+        // the user is not authenticated as an admin, then set a flash message asking the user to login with his account and 
+        // redirect the user to the login page
+        if (userSession.sessionData.role !== "admin"){
+            await flash_messages.setFlash(userSession.sessionID, "Please log in to your account.")
+            res.redirect("/login")
+    
+            return
+        }
+    
+        // Check and Retrieve any flash messages that are part of the user's current session
+        let flashMessage = await flash_messages.getFlash(sessionID)
+    
+        // Handling the flash message for welcoming back the user by rendering the user_login_alert template which displays
+        // the welcome back message, and redirects the user to the admin page
+        if (flashMessage === `Welcome Back ${userSession.sessionData.username}!`){
+            let welcomeBackMessage = flashMessage
+    
+            res.render("user_login_alert", {
+                layout:undefined,
+                welcomeBackMessage: welcomeBackMessage,
+                userIsAdmin: true
+            })
+    
+            return
+        }
+        
+        const fixed_locations = await location.getlocations()
+        res.render("admin_page",{
+            layout:undefined,
+            locations: fixed_locations
+        })
 })
 
 app.post("/login", async (req, res) => {
@@ -1245,16 +1297,41 @@ app.post("/change-profile-details", async (req, res) => {
 
 
 app.get('/posts', async (req, res) => {
-
     const dbPosts = await posts.getPosts()
     const fixed_locations = await location.getlocations()
 
-    res.render('posts',{
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    if ((sessionID && userSession) && (userSession.sessionData.role === "admin")) {
+
+        res.render("posts", {
+            layout: undefined,
+            userIsAdmin: true,
+            locations: dbPosts,
+            fixedlocations: fixed_locations
+        })
+
+        return
+    }
+    if((sessionID && userSession) && (userSession.sessionData.role === "member")){
+        res.render("posts", {
+            layout: undefined,
+            userIsMember: true,
+            locations: dbPosts,
+            fixedlocations: fixed_locations
+        })
+        
+        return
+    }
+    res.render("posts", {
         layout: undefined,
         locations: dbPosts,
         fixedlocations: fixed_locations
     })
+
 })
+
 
 app.post('/posts', async (req, res) => {
     let sessionID = req.cookies.sessionID

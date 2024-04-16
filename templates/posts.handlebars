@@ -1,11 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Character encoding and compatibility settings -->
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Viewport settings for responsive design -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Feeding Site</title>
-    <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui/dist/css/coreui.min.css" rel="stylesheet">
+
+    <!-- Page metadata for search engines -->
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+
+    <!-- CoreUI CSS and additional vendor stylesheets -->
+    <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@4.3.2/dist/css/coreui.min.css" rel="stylesheet" integrity="sha384-H8oVKJOQVGGCdfFNM+9gLKN0xagtq9oiNLirmijheEuqD3kItTbTvoOGgxVKqNiB" crossorigin="anonymous">
+
+    <!-- Apple touch icons for mobile devices -->
+    <link rel="apple-touch-icon" sizes="57x57" href="assets/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-icon-180x180.png">
+
+    <!-- Favicon for various sizes -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+    <link rel="manifest" href="assets/favicon/manifest.json">
+
+    <!-- Microsoft-specific settings for Windows Tiles -->
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="assets/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- CSS -->
+    <!-- Vendors styles-->
+    <link rel="stylesheet" href="vendors/simplebar/css/simplebar.css">
+    <link rel="stylesheet" href="css/vendors/simplebar.css">
+
+    <!-- Main styles for this application-->
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- We use those styles to show code examples, you should remove them in your application.-->
+    <link href="css/examples.css" rel="stylesheet">
+    
+    <!-- Leaflet Maps.-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+  
+    <title>Posts</title>
 </head>
+
+<style>
+  /* Base layout styles */
+    .container-fluid {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: auto;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px; /* Gutter for row */
+  }
+
+  .col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding: 0 15px; /* Gutter for columns */
+    box-sizing: border-box;
+  }
+
+  /* Navigation styles */
+  nav {
+    background-color: #4c5fd7; /* Darker shade for nav */
+    overflow: hidden;
+    padding: 0.5rem 0; /* Vertical padding */
+  }
+
+  nav a {
+    float: left;
+    display: block;
+    color: #fff;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    transition: background-color 0.3s ease; /* Smooth transition for hover */
+  }
+
+  nav a:hover {
+    background-color: #3a47b5; /* Hover state color */
+    color: #eaeaea;
+  }
+  .container-fluid {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: auto;
+  }
+
+  @media (max-width: 991.98px) {
+    .col-md-6 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    nav a {
+      padding: 10px;
+    }
+  }
+  .website-header {
+    text-align: center; /* Centers the text horizontally */
+    margin: 1rem 0; /* Adds some space above and below the header */
+  }
+
+  .website-header h1 {
+    font-size: 2.5rem; /* Large font size for the header */
+    color: #000; /* Black color text */
+    font-weight: bold; /* Bold font weight */
+    margin: 0; /* Removes default margin */
+    padding: 0.5rem; /* Adds some padding to increase clickable area if needed */
+  }
+
+</style>
+
 <body class="c-app">
   <!-- Header for the website -->
   <div class="website-header">
@@ -16,52 +143,81 @@
     <div class="container">
         <!-- Navigation Links -->
         <ul class="nav nav-pills justify-content-center">
+          <!-- Display login and register links only if the user is not a member or admin -->
+          {{#noneAreTrue userIsMember userIsAdmin userIsPublicViewer}}
           <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/posts">Posts</a>
+              <a class="nav-link" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href=#>Posts</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/about">About Us</a>
           </li>
-          <!-- Display login and register links only if the user is not a member or admin -->
-          {{#logicalAND userIsMember userIsAdmin}}
             <li class="nav-item">
                 <a href="/login" class="nav-link">Login</a>
             </li>
             <li class="nav-item">
                 <a href="/register" class="nav-link">Register</a>
             </li>
-          {{/logicalAND}}
+          {{/noneAreTrue}}
           <!-- Display member dashboard and logout links if the user is a member -->
           {{#if userIsMember}}
+          <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="/member-page">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href=#>Posts</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/about">About Us</a>
+          </li>
             <li class="nav-item">
               <a href="/member-page" class="nav-link">Member Dashboard</a>
             </li>
             <li class="nav-item">
               <a href="/logout" class="nav-link">Log Out</a>
             </li>
+            <li class="nav-item">
+              <button class="btn btn-primary" type="button" data-coreui-toggle="modal" data-coreui-target="#updateSiteModal">
+                  <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/>
+                  </svg>
+                  CreatePost
+              </button>
+            </li>
           {{/if}}
           <!-- Display admin dashboard and logout links if the user is an admin -->
           {{#if userIsAdmin}}
+          <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="/admin-home">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href=#>Posts</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/about">About Us</a>
+          </li>
             <li class="nav-item">
               <a href="/admin-page" class="nav-link">Admin Dashboard</a>
             </li>
             <li class="nav-item">
               <a href="/logout" class="nav-link">Log Out</a>
             </li>
+            <li class="nav-item">
+              <button class="btn btn-primary" type="button" data-coreui-toggle="modal" data-coreui-target="#updateSiteModal">
+                  <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/>
+                  </svg>
+                  CreatePost
+              </button>
+            </li>
           {{/if}}
         </ul>
     </div>
+    <!-- Tenor Embed Script -->
+    <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 </header>
-
-    <div class="container mt-3">
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button class="btn btn-primary" type="button" data-coreui-toggle="modal" data-coreui-target="#updateSiteModal">
-                <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/>
-                </svg>
-                CreatePost
-            </button>
-        </div>
 
         <!-- Modal -->
         <div class="modal fade" id="updateSiteModal" tabindex="-1" aria-labelledby="updateSiteModalLabel" aria-hidden="true">
