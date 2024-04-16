@@ -1,0 +1,215 @@
+<!DOCTYPE html><!--
+* CoreUI - Free Bootstrap Admin Template
+* @version v4.2.2
+* @link https://coreui.io/product/free-bootstrap-admin-template/
+* Copyright (c) 2023 creativeLabs Łukasz Holeczek
+* Licensed under MIT (https://github.com/coreui/coreui-free-bootstrap-admin-template/blob/main/LICENSE)
+-->
+<html lang="en">
+  <head>
+    <!-- Base URL for relative paths -->
+    <base href="./">
+
+    <!-- Character encoding and compatibility settings -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Viewport settings for responsive design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+
+    <!-- Page metadata for search engines -->
+    <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+    <meta name="author" content="Łukasz Holeczek">
+    <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+
+    <!-- CoreUI CSS and additional vendor stylesheets -->
+    <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@4.3.2/dist/css/coreui.min.css" rel="stylesheet" integrity="sha384-H8oVKJOQVGGCdfFNM+9gLKN0xagtq9oiNLirmijheEuqD3kItTbTvoOGgxVKqNiB" crossorigin="anonymous">
+
+    <!-- Apple touch icons for mobile devices -->
+    <link rel="apple-touch-icon" sizes="57x57" href="assets/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-icon-180x180.png">
+
+    <!-- Favicon for various sizes -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+
+    <!-- PWA manifest for progressive web app support -->
+    <link rel="manifest" href="assets/favicon/manifest.json">
+
+    <!-- Microsoft-specific settings for Windows Tiles -->
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="assets/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Vendors styles-->
+    <link rel="stylesheet" href="vendors/simplebar/css/simplebar.css">
+    <link rel="stylesheet" href="css/vendors/simplebar.css">
+    <!-- Main styles for this application-->
+    <link href="css/style.css" rel="stylesheet">
+    <!-- We use those styles to show code examples, you should remove them in your application.-->
+    <link href="css/examples.css" rel="stylesheet">
+
+    <!-- Page title -->
+    <title>Register</title>
+  </head>
+
+  <!-- Inline style to center form elements -->
+  <style>
+    .col-6 {
+      display: flex;
+      justify-content: center;
+      margin: auto;
+      margin-right: 1em;
+      margin-top: -5.5em;
+    }
+
+    .px-4 {
+      padding-top: 0.7em;
+      padding-bottom: 0.55em;
+    }
+  </style>
+  <body>
+    <!-- Register page container -->
+    <div class="bg-light min-vh-100 d-flex flex-row align-items-center">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-6">
+            <!-- Register form card -->
+            <div class="card mb-4 mx-4">
+              <div class="card-body p-4">
+                <h1>{{{userAccount.userDetails.username}}}'s Profile</h1>
+                <p class="text-medium-emphasis">Change Profile Details</p>
+                <!-- Unless an error message exists, render normal registration form -->
+                {{#unless errorMessage}}
+                    <form action="/change-profile-details" method="POST">
+                        <!-- Firstname input field -->
+                        <div class="input-group mb-3"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-user"></use>
+
+                            </svg></span>
+                        <input class="form-control" type="text" placeholder="New First Name" value="{{{userAccount.userDetails.firstname}}}" name="firstnameInput">
+                        </div>
+                        <!-- Lastname input field -->
+                        <div class="input-group mb-3"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-user"></use>
+
+                            </svg></span>
+                        <input class="form-control" type="text" placeholder="New Last Name" value="{{{userAccount.userDetails.lastname}}}" name="lastnameInput">
+                        </div>
+                        <!-- Email input field -->
+                        <div class="input-group mb-3"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-envelope-open"></use>
+                            </svg></span>
+                        <input class="form-control" type="text" placeholder="New Email" value={{{userAccount.userDetails.email}}} name="emailInput">
+                        </div>
+                        <!-- Username input field -->
+                        <div class="input-group mb-3"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-user"></use>
+                            </svg></span>
+                        <input class="form-control" type="text" placeholder="New Username" value={{{userAccount.userDetails.username}}} name="usernameInput">
+                        </div>
+                        <!-- Password input field -->
+                        <div class="input-group mb-3"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-lock-locked"></use>
+                            </svg></span>
+                        <input class="form-control" type="password" placeholder="New Password" name="passwordInput">
+                        </div>
+                        <!-- Repeat password input field -->
+                        <div class="input-group mb-4"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-lock-locked"></use>
+                            </svg></span>
+                        <input class="form-control" type="password" placeholder="Confirm New Password" name="repeatPasswordInput">
+                        </div>
+                        <!-- Save Changes button -->
+                        <button class="btn btn-primary btn-lg mt-3" type="submit">Save Changes</button>
+                    </form>
+                {{/unless}}
+               <!-- Display error message if it exists -->
+                {{#if errorMessage}}
+                    <div class="alert alert-danger" role="alert">
+                        {{errorMessage}}
+                    </div>
+                    <!-- Repopulate the form with previously entered data based on type of error message -->
+                    <form action="/change-profile-details" method="POST">
+                        <!-- Firstname input field -->
+                        <div class="input-group mb-3"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-user"></use>
+                            </svg></span>
+                            <input class="form-control" type="text" placeholder="New First Name" name="firstnameInput" value="{{{firstnameInput}}}">
+                        </div>
+                        <!-- Lastname input field -->
+                        <div class="input-group mb-3"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-user"></use>
+
+                            </svg></span>
+                        <input class="form-control" type="text" placeholder="New Last Name" name="lastnameInput" value="{{{lastnameInput}}}">
+                        </div>
+                        <!-- Email input field -->
+                        <div class="input-group mb-3"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-envelope-open"></use>
+                            </svg></span>
+                        <input class="form-control" type="text" placeholder="New Email" name="emailInput" value={{{emailInput}}}>
+                        </div>
+                        <!-- Username input field -->
+                        <div class="input-group mb-3"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-user"></use>
+                            </svg></span>
+                        <input class="form-control" type="text" placeholder="New Username" name="usernameInput" value={{{usernameInput}}}>
+                        </div>
+                        <!-- Password input field -->
+                        <div class="input-group mb-3"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-lock-locked"></use>
+                            </svg></span>
+                        <input class="form-control" type="password" placeholder="New Password" name="passwordInput" value={{{passwordInput}}}>
+                        </div>
+                        <!-- Repeat password input field -->
+                        <div class="input-group mb-4"><span class="input-group-text">
+                            <svg class="icon">
+                            <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-lock-locked"></use>
+                            </svg></span>
+                        <input class="form-control" type="password" placeholder="Confirm New Password" name="repeatPasswordInput" value={{{repeatPasswordInput}}}>
+                        </div>
+                        <!-- Save changes button -->
+                        <button class="btn btn-primary btn-lg mt-3" type="submit">Save Changes</button>
+                    </form>
+                {{/if}}
+              </div>
+              <!-- Back to member dashboard form -->
+              <form action="/member-page" method="GET">
+                <div class="col-6">
+                  <button class="btn btn-primary btn-lg mt-3" type="submit">Back to member dashboard</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="vendors/@coreui/coreui/js/coreui.bundle.min.js"></script>
+    <script src="vendors/simplebar/js/simplebar.min.js"></script>
+    <script>
+    </script>
+
+  </body>
+</html>

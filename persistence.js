@@ -202,10 +202,15 @@ async function getUserDetailsByEmail(email) {
  * @param {Object} details - The user object containing updated details.
  * @returns {Promise<void>} A promise that resolves with no value when the update completes.
  */
-async function updateUserDetails(details) {
+async function updateUserDetails(email, details) {
     await connectDatabase();
-    let payload = await getUserDetailsByEmail(details.userDetails.email);
-    await users.updateOne(payload, details);
+    await users.replaceOne({"userDetails.email":email}, details)
+}
+
+async function updateUserDetailsByID(modifiedUserDetails, previousAccountID) {
+    await connectDatabase()
+    let userDetails = modifiedUserDetails
+    await users.replaceOne({_id:previousAccountID}, {userDetails})
 }
 
 /**
@@ -254,7 +259,8 @@ module.exports = {
     updateUserDetails,
     getPosts,
     insertPost,
-    updateLocations
+    updateLocations,
+    updateUserDetailsByID
 }
 
 

@@ -18,7 +18,7 @@ async function resetPassword(email) {
 
     let key = crypto.randomUUID() //generate key
     details.resetKey = key //add key to user in database
-    await persistence.updateUserDetails(details) //update the database
+    await persistence.updateUserDetails(details.userDetails.email, details) //update the database
     console.log(`http://127.0.0.1:8000/reset-password/?key=${key}`) //send the link with key to user (in console)
 }
 

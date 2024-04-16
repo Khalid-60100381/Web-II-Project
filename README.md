@@ -35,7 +35,7 @@ Visit the site using localhost on port 8000:
 
 # Admin:
 > **User**: `admin`
-> **Password**: `admin123` 
+> **Password**: `Admin@123` 
 
 # Member:
 > **User:** `member`  

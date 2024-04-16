@@ -9,6 +9,7 @@ const login_form_validation = require("./business_layer/login_form_validation.js
 const authorization = require("./business_layer/authorization.js")
 const passwordReset = require("./business_layer/password_reset.js")
 const posts = require("./business_layer/posts.js")
+const change_profile_details = require("./business_layer/change_profile_details.js")
 const csrf_protection = require("./business_layer/csrf_protection.js")
 
 // Importing required packages for Express application
@@ -899,6 +900,21 @@ app.post('/reset-password', async (req, res) => {
     let confirmNewPassword = req.body.confirmNewPassword
     let resetKey = req.body.resetKey
 
+
+    // Check if any empty fields exist (including whitespace characters)
+    let emptyFields = await login_form_validation.checkEmptyFields(newPassword, confirmNewPassword)
+
+    // If any empty fields exist, then render the reset password page with an error message
+    if (emptyFields) {
+        res.render("reset_password", {
+            layout: undefined, 
+            errorMessage: "All fields must be filled in.",
+            resetKey: resetKey
+        })
+
+        return
+    }
+
     // Validate if user password length is 8 characters or more, and contains at least one uppercase, lowercase, digit, 
     // and special character
     let passwordComplexityValidated = await registration_form_validation.validatePasswordComplexity(newPassword)
@@ -936,6 +952,8 @@ app.post('/reset-password', async (req, res) => {
         return
     }
 
+    
+
     // Pass the new password and reset key to the password reset sub-layer to update the user's password in the database
     // and set a flash message telling the user that the password has been reset successfully
     await passwordReset.setNewPassword(resetKey, newPassword)
@@ -945,7 +963,272 @@ app.post('/reset-password', async (req, res) => {
     res.redirect("/login")
 })
 
+
+app.get("/change-profile-details", async (req, res) => {
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should register again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please login again.")
+        res.redirect("/login")
+
+        return
+    }
+
+    // If the user tries to directly access a protected route (/member-page) and the user's session data indicates that 
+    // the user is not authenticated as either a member or admin, then set a flash message asking the user to login with 
+    // his account and redirect the user to the login page
+    if (userSession.sessionData.role !== "member" && userSession.sessionData.role !== "admin"){
+        await flash_messages.setFlash(userSession.sessionID, "Please log in to your account.")
+        res.redirect("/login")
+
+        return
+    }
+
+    let userAccount = await change_profile_details.findUserAccount(userSession.sessionData.username)
+
+    res.render("change_profile_details", {
+        layout: undefined,
+        userAccount: userAccount
+    })
+})
+
+
+app.post("/change-profile-details", async (req, res) => {
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should login again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please login again.")
+        res.redirect("/login")
+
+        return
+    }
+
+    let userAccount = await change_profile_details.findUserAccount(userSession.sessionData.username)
+
+    // Get the user's new firstname, lastname, email, username, password, and password confirmation inputs from the form fields
+    let firstnameInput = req.body.firstnameInput
+    let lastnameInput = req.body.lastnameInput
+    let emailInput = req.body.emailInput
+    let usernameInput = req.body.usernameInput
+    let passwordInput = req.body.passwordInput
+    let repeatPasswordInput = req.body.repeatPasswordInput
+
+    let modifiedUserDetails = {
+        firstname: "",
+        lastname: "",
+        email: "",
+        username: "",
+        password: "",
+        role: userAccount.userDetails.role
+    }
+
+    if (firstnameInput !== userAccount.userDetails.firstname || lastnameInput !== userAccount.userDetails.lastname) {
+        // Before letter validation, Remove any leading or trailing whitespaces from firstname and lastname
+        firstnameInput = firstnameInput.trim()
+        lastnameInput = lastnameInput.trim()
+
+        // Validate if firstname and lastname consist of letters only
+        let firstnameLastnameValidated = await registration_form_validation.validateFirstnameLastname(firstnameInput, lastnameInput)
+
+        //If firstname or lastname does not consist of letters only
+        if (!firstnameLastnameValidated){
+            return res.render("register", { 
+                layout: undefined, 
+                errorMessage: "Firstname and lastname must contain letters only", 
+                // Pass all form inputs back to the template for repopulating the form, and display error message
+                emailInput: emailInput,
+                usernameInput: usernameInput,
+                passwordInput: passwordInput,
+                repeatPasswordInput: repeatPasswordInput
+            })
+        }
+
+        // After letter validation, remove all whitespaces in between the letters from firstname and lastname
+        firstnameInput = firstnameInput.replace(/\s+/g, "")
+        lastnameInput = lastnameInput.replace(/\s+/g, "")
+
+        if (firstnameLastnameValidated){
+            modifiedUserDetails.firstname = firstnameInput
+            modifiedUserDetails.lastname = lastnameInput
+        }
+    }
+
+    if (passwordInput || repeatPasswordInput){
+        // Check if the user-inputted passwords match
+        let passwordsMatch = await registration_form_validation.checkPasswordMatch(passwordInput, repeatPasswordInput)
+
+        //If passwords do not match
+        if (!passwordsMatch) {
+            return res.render("change_profile_details", { 
+                layout: undefined, 
+                errorMessage: "Passwords do not match", 
+                // Pass all form inputs back to the template for repopulating the form, except password and repeated password,
+                // and display error message
+                firstnameInput: firstnameInput,
+                lastnameInput: lastnameInput,
+                emailInput: emailInput,
+                usernameInput: usernameInput,
+                userAccount: userAccount
+            })
+        }
+
+        //Before validation, remove all whitespaces from the user password
+        passwordInput = passwordInput.replace(/\s+/g, "")
+
+        // Validate if user password length is 8 characters or more, and contains at least one uppercase, lowercase, digit, 
+        // and special character
+        let passwordComplexityValidated = await registration_form_validation.validatePasswordComplexity(passwordInput)
+
+        //If user password does not meet password complexity requirements
+        if (!passwordComplexityValidated) {
+            return res.render("change_profile_details", { 
+                layout: undefined, 
+                errorMessage: `Password Requirements:
+                            - At least 8 characters
+                            - Contain at least one uppercase letter
+                            - Contain at least one lowercase letter
+                            - Contain at least one digit
+                            - Contain at least one symbol
+                            - Contain no whitespaces`,
+
+                // Pass all form inputs back to the template for repopulating the form, except password and repeated password,
+                // and display error message
+                firstnameInput: firstnameInput,
+                lastnameInput: lastnameInput,
+                emailInput: emailInput,
+                usernameInput: usernameInput,
+                userAccount: userAccount
+            })
+        }
+
+        if (passwordsMatch && passwordComplexityValidated){
+            modifiedUserDetails.password = passwordInput
+        }
+    }
+
+    if (usernameInput !== userAccount.userDetails.username) {
+        //Before username validation, remove any leading or trailing whitespaces from username
+        usernameInput = usernameInput.trim()
+
+        //Check that username starts with an alphabetic character, does not contain spaces or “@”, is between 6 and 30 
+        // characters (both inclusive), and contains only valid Unix Characters (uppercase and lowercase letters, numbers, 
+        // “-”, “.”, and “_”
+        let usernameValidated = await registration_form_validation.validateUsername(usernameInput)
+
+        //If username does not meet criteria
+        if (!usernameValidated){
+            return res.render("change_profile_details", { 
+                layout: undefined, 
+                errorMessage: `Username Requirements:
+                - Between 6 and 30 characters (both inclusive)
+                - Starts with an alphabetic character (lowercase or uppercase)
+                - Does not contain whitespaces or “@” symbol
+                - Contains only valid Unix Characters (uppercase and lowercase letters, digits, “-”, “.”, and “_”`,
+
+                // Pass all form inputs back to the template for repopulating the form, except for username, and display 
+                // error message
+                firstnameInput: firstnameInput,
+                lastnameInput: lastnameInput,
+                emailInput: emailInput,
+                passwordInput: passwordInput,
+                repeatPasswordInput: repeatPasswordInput,
+                userAccount: userAccount
+            })
+        }
+
+        //Check if the user-inputted username already exists in the database
+        let usernameExists = await registration_form_validation.checkUsernameExists(usernameInput)
+
+        //If username exits in database
+        if (usernameExists){
+            return res.render("change_profile_details", { 
+                layout: undefined, 
+                errorMessage: "Username already taken", 
+                // Pass all form inputs back to the template for repopulating the form, except for the username, 
+                // and display error message
+                firstnameInput: firstnameInput,
+                lastnameInput: lastnameInput,
+                emailInput: emailInput,
+                passwordInput: passwordInput,
+                repeatPasswordInput: repeatPasswordInput,
+                userAccount: userAccount
+            })
+        }
+
+        if (usernameValidated && !usernameExists){
+            modifiedUserDetails.username = usernameInput
+        }
+    }
+
+    if (emailInput !== userAccount.userDetails.email) {
+        //Validates the email format of user-inputted email
+        let emailValidated = await registration_form_validation.validateEmail(emailInput)
+
+        //If email does not meet criteria
+        if (!emailValidated){
+            return res.render("change_profile_details", { 
+                layout: undefined, 
+                errorMessage: "Invalid email format", 
+                // Pass all form inputs back to the template for repopulating the form, except for the email, and display 
+                // error message
+                firstnameInput: firstnameInput,
+                lastnameInput: lastnameInput,
+                usernameInput: usernameInput,
+                passwordInput: passwordInput,
+                repeatPasswordInput: repeatPasswordInput,
+                userAccount: userAccount
+            })
+        }
+
+        //Check if the user-inputted email already exists in the database
+        let emailExists = await registration_form_validation.checkEmailExists(emailInput)
+
+        //If email exists in database
+        if (emailExists){
+            return res.render("change_profile_details", { 
+                layout: undefined, 
+                errorMessage: "Email already taken", 
+                // Pass all form inputs back to the template for repopulating the form, except for the email, 
+                // and display error message
+                firstnameInput: firstnameInput,
+                lastnameInput: lastnameInput,
+                usernameInput: usernameInput,
+                passwordInput: passwordInput,
+                repeatPasswordInput: repeatPasswordInput,
+                userAccount: userAccount
+            })
+        }
+
+        if (emailValidated && !emailExists){
+            modifiedUserDetails.email = emailInput
+        }
+    }
+
+    await change_profile_details.fillInExistingValues(modifiedUserDetails, userAccount.userDetails)
+    await change_profile_details.updateUserDetailsByID(modifiedUserDetails, userAccount._id, userSession.sessionData.username)
+
+    res.redirect("/member-page")
+})
+
+
 app.get('/posts', async (req, res) => {
+
     const dbPosts = await posts.getPosts()
 
     res.render('posts',{
@@ -966,7 +1249,8 @@ app.post('/posts', async (req, res) => {
             food_bowl: req.body.food_bowl === 'true',
             water_bowl: req.body.water_bowl === 'true'
         }
-    };
+    }
+
     let updateResult = await posts.updateLocations(req.body.location_name, userInput)
     await posts.insertPost(userInput)
     if(!updateResult){
