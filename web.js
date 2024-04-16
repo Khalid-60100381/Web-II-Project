@@ -31,6 +31,10 @@ handlebars.registerHelper('logicalAND', function(v1, v2, options) {
     return options.inverse(this);
 })
 
+handlebars.registerHelper('eq', function (val1, val2) {
+    return val1 === val2;
+  });
+
 //Handlebars helper function to format last updated time
 handlebars.registerHelper('formatLastUpdated', function(lastUpdated) {
     // Calculate the time difference between now and the last updated time

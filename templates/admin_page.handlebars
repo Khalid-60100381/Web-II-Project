@@ -158,23 +158,19 @@ h2 {
 <body class="c-app">
   <!-- CoreUI Header --> 
   <header class="c-header c-header-light c-header-fixed">
-  
+          <div class="welcome-section">
+            <h3>This is the Admin page</h3>
+          </div>
   <!-- Navigation links -->
   <ul class="nav nav-pills">
     <li class="nav-item">
-      <a class="nav-link active" aria-current="page" href="/">Home</a>
+      <a class="nav-link" href="/">Home</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="/posts">Posts</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="/about">About Us</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="/reports">Reports</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="/notifications">Notifications</a>
+      <a class="nav-link active" aria-current="page" href="/">Admin Dashboard</a>
     </li>
     <li class="nav-item">
       <a href="/logout" class="nav-link">Log Out</a>
@@ -187,12 +183,13 @@ h2 {
   <main class="c-main">
     <!-- Container for the main content -->
     <div class="container-fluid">
-          <div class="welcome-section">
-            <h3>This is the Admin page template</h3>
+          <div>
+            {{> cards}}
           </div>
           <div>
             {{> locations_admin}}
           </div>
+
     </div>
   </main>
 </div>
