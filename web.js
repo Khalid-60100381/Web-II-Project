@@ -18,9 +18,18 @@ const {engine} = require('express-handlebars')
 const handlebars = require('handlebars')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
+const fileUpload=require('express-fileupload')
 
-// Initializing Express application and handelbars engine and templates directory
+// Initializing Express application, Adding middleware for parsing URL-encoded bodies and cookies
 const app = express()
+app.use(bodyParser.urlencoded())
+app.use(cookieParser())
+app.use(fileUpload())
+app.use('/uploads', express.static('uploads'));
+
+
+//HandleBars Stuff
+//Initializing handelbars engine and templates directory
 app.set ('views', __dirname+"/templates")
 app.set('view engine', 'handlebars')
 
@@ -53,7 +62,6 @@ handlebars.registerHelper('formatLastUpdated', function(lastUpdated) {
     }
 });
 
-
 // Configuring the Handlebars engine for the Express application
 app.engine('handlebars', engine({
     partialsDir: __dirname + '/templates/partials',
@@ -64,12 +72,10 @@ app.engine('handlebars', engine({
         logicalAND: handlebars.helpers.logicalAND
     }
 }))
+//END OF HandleBars Stuff
 
-// Adding middleware for parsing URL-encoded bodies and cookies
-app.use(bodyParser.urlencoded())
-app.use(cookieParser())
-
-
+//Start of app
+//Landing Page:
 app.get("/", async (req, res) => {
     // Retrieve the current user's session ID from the cookie value, then check if the user's current sessionID 
     // corresponds to an existing user session in the database
@@ -188,6 +194,16 @@ app.get("/login", async (req, res) => {
             sessionExpiryError: sessionExpiryError
         })
     }
+
+    if (flashMessage === "You must be signed in to be able to post."){
+        let unauthorizedAccess = flashMessage
+
+        res.render("login", {
+            layout: undefined,
+            unauthorizedAccess: unauthorizedAccess
+        })
+    }
+    
 
     // If a flash message exists storing the registration confirmation message coming from the POST /register route, 
     // then render the confirmation message as part of the login page
@@ -1230,33 +1246,71 @@ app.post("/change-profile-details", async (req, res) => {
 app.get('/posts', async (req, res) => {
 
     const dbPosts = await posts.getPosts()
+    const fixed_locations = await location.getlocations()
 
     res.render('posts',{
         layout: undefined,
-        locations: dbPosts
+        locations: dbPosts,
+        fixedlocations: fixed_locations
     })
 })
 
 app.post('/posts', async (req, res) => {
-    let userInput = {
-        name: req.body.location_name,
-        food_level: req.body.food_level,
-        water_level: req.body.water_level,
-        cat_number: req.body.number_of_cats, // Assuming this should be a number
-        health_issue: req.body.health_issue,
-        critical_item: {
-            letterbox: req.body.letterbox === 'true',
-            food_bowl: req.body.food_bowl === 'true',
-            water_bowl: req.body.water_bowl === 'true'
-        }
-    }
+    let sessionID = req.cookies.sessionID
+    let userSession = await session_management.getSession(sessionID)
+    
+    if ((sessionID && userSession) && (userSession.sessionData.role !== "member" && userSession.sessionData.role !== "admin")) {
 
-    let updateResult = await posts.updateLocations(req.body.location_name, userInput)
-    await posts.insertPost(userInput)
-    if(!updateResult){
-        res.send("update failed")
+
+        await flash_messages.setFlash(userSession.sessionID, "You must be signed in to be able to post.")
+        res.redirect("/login")
+        return
     }
-    res.redirect('/posts')
+    if(req.files && req.files.submission){
+
+        let theFile = req.files.submission;
+        let timestamp = Date.now();
+        let fileName = `${timestamp}_${req.files.submission.name}`;
+        await theFile.mv(`${__dirname}/uploads/${fileName}`)
+
+        let userInput = {
+            name: req.body.location_name,
+            text_post: req.body.text_post,
+            food_level: req.body.food_level,
+            water_level: req.body.water_level,
+            cat_number: req.body.number_of_cats, // Assuming this should be a number
+            health_issue: req.body.health_issue,
+            critical_item: {
+                letterbox: req.body.letterbox === 'true',
+                food_bowl: req.body.food_bowl === 'true',
+                water_bowl: req.body.water_bowl === 'true'
+            },
+            file_path: fileName
+        };
+
+        await posts.updateLocations(req.body.location_name, userInput)
+        await posts.insertPost(userInput)
+        res.redirect('/posts')
+
+    }else{
+
+        let userInput = {
+            name: req.body.location_name,
+            food_level: req.body.food_level,
+            water_level: req.body.water_level,
+            cat_number: req.body.number_of_cats, // Assuming this should be a number
+            health_issue: req.body.health_issue,
+            critical_item: {
+                letterbox: req.body.letterbox === 'true',
+                food_bowl: req.body.food_bowl === 'true',
+                water_bowl: req.body.water_bowl === 'true'
+            }
+        };
+
+        await posts.updateLocations(req.body.location_name, userInput)
+        await posts.insertPost(userInput)
+        res.redirect('/posts')
+    }
 })
 
 app.get('/logout', async (req, res) => {

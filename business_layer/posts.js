@@ -7,7 +7,6 @@ async function getPosts(){
 }
 
 async function insertPost(details){
-    console.log(details)
     const result = await persistence.insertPost(details)
     return result
 }

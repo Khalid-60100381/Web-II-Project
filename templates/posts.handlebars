@@ -6,7 +6,53 @@
     <title>Update Feeding Site</title>
     <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui/dist/css/coreui.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="c-app">
+  <!-- Header for the website -->
+  <div class="website-header">
+    <h1>Stray Cat Locator</h1>
+  </div>
+  <!-- CoreUI Header --> 
+<header class="c-header c-header-light c-header-fixed">
+    <div class="container">
+        <!-- Navigation Links -->
+        <ul class="nav nav-pills justify-content-center">
+          <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/posts">Posts</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/about">About Us</a>
+          </li>
+          <!-- Display login and register links only if the user is not a member or admin -->
+          {{#logicalAND userIsMember userIsAdmin}}
+            <li class="nav-item">
+                <a href="/login" class="nav-link">Login</a>
+            </li>
+            <li class="nav-item">
+                <a href="/register" class="nav-link">Register</a>
+            </li>
+          {{/logicalAND}}
+          <!-- Display member dashboard and logout links if the user is a member -->
+          {{#if userIsMember}}
+            <li class="nav-item">
+              <a href="/member-page" class="nav-link">Member Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a href="/logout" class="nav-link">Log Out</a>
+            </li>
+          {{/if}}
+          <!-- Display admin dashboard and logout links if the user is an admin -->
+          {{#if userIsAdmin}}
+            <li class="nav-item">
+              <a href="/admin-page" class="nav-link">Admin Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a href="/logout" class="nav-link">Log Out</a>
+            </li>
+          {{/if}}
+        </ul>
+    </div>
+</header>
+
     <div class="container mt-3">
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
             <button class="btn btn-primary" type="button" data-coreui-toggle="modal" data-coreui-target="#updateSiteModal">
@@ -27,15 +73,19 @@
                     </div>
                     <div class="modal-body">
                         <!-- Form -->
-                        <form action="/posts" method="POST">
+                        <form action="/posts" method="POST" enctype='multipart/form-data'>
                             <div class="mb-3">
                                 <label for="location_name" class="form-label">Location:</label>
                                 <select class="form-select" id="location_name" name="location_name" required>
                                     <option value="" disabled selected>Select Location</option>
-                                    {{#each locations as |location|}}
-                                    <option value="{{location.name}}">{{location.name}}</option>
+                                    {{#each fixedlocations as |flocation|}}
+                                    <option value="{{flocation.name}}">{{flocation.name}}</option>
                                     {{/each}}
                                 </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="text_post" class="form-label">Notes:</label>
+                                <input type="text" class="form-control" id="text_post" name="text_post">
                             </div>
                             <div class="mb-3">
                                 <label for="food_level" class="form-label">Food Level (%):</label>
@@ -48,9 +98,9 @@
                             <div class="mb-3">
                                 <label for="health_issue" class="form-label">Health Issue:</label>
                                 <select class="form-select" id="health_issue" name="health_issue" required>
-                                    <option value="none">None</option>
-                                    <option value="minor">Minor</option>
-                                    <option value="urgent">Urgent</option>
+                                    <option value="None">None</option>
+                                    <option value="Minor">Minor</option>
+                                    <option value="Urgent">Urgent</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -72,6 +122,9 @@
                                     <label class="form-check-label" for="water_bowl">Water Bowl</label>
                                 </div>
                             </fieldset>
+                            <label for="file">Upload file:</label>
+                            <input type="file" id="file" name="submission">
+                            <br><br>
                             <button type="submit" class="btn btn-success">Update Details</button>
                         </form>
                     </div>
@@ -91,8 +144,8 @@
                 <div class="card-body">
                     <!-- Display Last Updated Time -->
                     <p class="text-muted">Last Updated: {{formatLastUpdated location.lastUpdated}}</p>
-
                     <h5 class="card-title">{{location.name}}</h5>
+                    <p>{{location.text_post}}</p>
                     <p class="card-text">{{location.info}}</p>
                     <div class="mb-2">
                         <label class="form-label">Food Level:</label>
@@ -141,6 +194,11 @@
                             </li>
                         </ul>
                     </div>
+                    {{#if location.file_path}}
+                    <div>
+                        <img src="/uploads/{{location.file_path}}" class="card-img-top mb-3" alt="Feeding Station Image">
+                    </div>
+                    {{/if}}
                 </div>
             </div>
         </div>

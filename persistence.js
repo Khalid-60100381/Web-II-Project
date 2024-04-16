@@ -158,7 +158,7 @@ async function getlocations(){
 
 async function getPosts(){
     await connectDatabase()
-    const cursor = await posts.find() // Pointer to the object list 
+    const cursor = await posts.find().sort({ lastUpdated: -1 }); // Pointer to the object list 
     const pulledPosts = await cursor.toArray(); // Turning the object list into an array to loop through in handlebar
     return pulledPosts
 }
