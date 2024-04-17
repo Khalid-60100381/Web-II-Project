@@ -108,6 +108,8 @@ async function getSession(sessionID){
     await connectDatabase()
     // Search for the user's current session in the database and return it
     return await sessions.findOne({sessionID:sessionID})
+
+    
 }
 
 /**

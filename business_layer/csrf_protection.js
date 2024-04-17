@@ -11,7 +11,6 @@ async function generateCSRFFormToken(sessionID){
     let csrfToken = crypto.randomUUID()
     let userSession = await session_management.getSession(sessionID)
     userSession.sessionData.csrfToken = csrfToken
-
     await session_management.updateSession(sessionID, userSession)
     return csrfToken
 }
@@ -26,7 +25,18 @@ async function cancelToken(sessionID){
     await session_management.updateSession(sessionID, userSession)
 }
 
+async function compareToken(csrfToken,sessionID){
+    let userSession = await session_management.getSession(sessionID)
+    sessionToken = userSession.sessionData.csrfToken
+    if (sessionToken !== csrfToken){
+        return false
+    }
+    return true
+}
+
+
 module.exports = {
     generateCSRFFormToken,
-    cancelToken
+    cancelToken,
+    compareToken
 }

@@ -135,6 +135,7 @@
                             </svg></span>
                         <input class="form-control" type="password" placeholder="Confirm New Password" name="repeatPasswordInput">
                         </div>
+                        <input type="hidden" name="csrf" value="{{csrfToken}}">
                         <!-- Save Changes button -->
                         <button class="btn btn-primary btn-lg mt-3" type="submit">Save Changes</button>
                     </form>
@@ -189,6 +190,7 @@
                             </svg></span>
                         <input class="form-control" type="password" placeholder="Confirm New Password" name="repeatPasswordInput" value={{{repeatPasswordInput}}}>
                         </div>
+                        <input type="hidden" name="csrf" value="{{csrfToken}}">
                         <!-- Save changes button -->
                         <button class="btn btn-primary btn-lg mt-3" type="submit">Save Changes</button>
                     </form>

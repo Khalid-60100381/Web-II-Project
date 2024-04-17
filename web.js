@@ -1065,26 +1065,20 @@ app.get("/change-profile-details", async (req, res) => {
     }
 
     let userAccount = await change_profile_details.findUserAccount(userSession.sessionData.username)
-
-    /*CSRF EXAMPLE FROM LAB 8:
-    let csrfToken = await business.generateCSRFToken(key)
-
-    res.render('applications', {
-        layout: undefined,
-        applications: apps,
-        csrfToken: csrfToken
-    })
-    */
+    
+    let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
 
     res.render("change_profile_details", {
         layout: undefined,
         userAccount: userAccount,
-        oldUsername: userSession.sessionData.username
+        oldUsername: userSession.sessionData.username,
+        csrfToken: csrfToken
     })
 })
 
 
 app.post("/change-profile-details", async (req, res) => {
+    let csrfToken = req.body.csrf
     // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
@@ -1139,7 +1133,8 @@ app.post("/change-profile-details", async (req, res) => {
                 usernameInput: usernameInput,
                 passwordInput: passwordInput,
                 repeatPasswordInput: repeatPasswordInput,
-                oldUsername: userSession.sessionData.username
+                oldUsername: userSession.sessionData.username,
+                csrfToken: csrfToken
             })
         }
 
@@ -1169,7 +1164,8 @@ app.post("/change-profile-details", async (req, res) => {
                 emailInput: emailInput,
                 usernameInput: usernameInput,
                 userAccount: userAccount,
-                oldUsername: userSession.sessionData.username
+                oldUsername: userSession.sessionData.username,
+                csrfToken: csrfToken
             })
         }
 
@@ -1199,7 +1195,8 @@ app.post("/change-profile-details", async (req, res) => {
                 emailInput: emailInput,
                 usernameInput: usernameInput,
                 userAccount: userAccount,
-                oldUsername: userSession.sessionData.username
+                oldUsername: userSession.sessionData.username,
+                csrfToken: csrfToken
             })
         }
 
@@ -1236,7 +1233,8 @@ app.post("/change-profile-details", async (req, res) => {
                 passwordInput: passwordInput,
                 repeatPasswordInput: repeatPasswordInput,
                 userAccount: userAccount,
-                oldUsername: userSession.sessionData.username
+                oldUsername: userSession.sessionData.username,
+                csrfToken: csrfToken
             })
         }
 
@@ -1256,7 +1254,8 @@ app.post("/change-profile-details", async (req, res) => {
                 passwordInput: passwordInput,
                 repeatPasswordInput: repeatPasswordInput,
                 userAccount: userAccount,
-                oldUsername: userSession.sessionData.username
+                oldUsername: userSession.sessionData.username,
+                csrfToken: csrfToken
             })
         }
 
@@ -1283,7 +1282,8 @@ app.post("/change-profile-details", async (req, res) => {
                 passwordInput: passwordInput,
                 repeatPasswordInput: repeatPasswordInput,
                 userAccount: userAccount,
-                oldUsername: userSession.sessionData.username
+                oldUsername: userSession.sessionData.username,
+                csrfToken: csrfToken
             })
         }
 
@@ -1303,7 +1303,8 @@ app.post("/change-profile-details", async (req, res) => {
                 passwordInput: passwordInput,
                 repeatPasswordInput: repeatPasswordInput,
                 userAccount: userAccount,
-                oldUsername: userSession.sessionData.username
+                oldUsername: userSession.sessionData.username,
+                csrfToken: csrfToken
             })
         }
 
@@ -1311,27 +1312,26 @@ app.post("/change-profile-details", async (req, res) => {
             modifiedUserDetails.email = emailInput
         }
     }
-
-    /*CONTINUED CSRF EXAMPLE FROM LAB 8 (NOTE: YOU MAY NEED TO RENDER THE CSRF TOKEN EVERYTIME THE PAGE IS RENDERED DUE TO THE
-    ERROR MESSAGES, BUT PLEASE CHECK IF THIS IS NECESSARY IN YOUR IMPLEMENTATION):
-    
-        let sd = await business.getSession(key)
-        let csrfToken = req.body.csrfToken
-
-        if (csrfToken !== sd.csrfToken){
-            res.status(419)
-            res.send("CSRF token mismatch, approval process rejected") //RENDER FLASH MESSAGE TELLING THE USER THAT THE REQUEST 
-                                                                         WAS NOT PROCESSED IF THE CSRF TOKENS DO NOT MATCH
-            return
-        }
-
-        //CONTINUE WITH THE APPROVAL PROCESS IF THE CSRF TOKENS MATCH
-        let email = req.body.email
-        await business.approveRegistration(email)
-        await business.cancelCSRFToken()
-        
-        res.redirect('/application')
-        */
+        let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
+        console.log(compareResult)
+        if (!compareResult){
+            await csrf_protection.cancelToken(sessionID)
+            console.log("after cancel:" + compareResult)
+            return res.render("change_profile_details", { 
+                layout: undefined, 
+                errorMessage: "CSRF token mismatch, approval process rejected", 
+                // Pass all form inputs back to the template for repopulating the form, except for the email, 
+                // and display error message
+                firstnameInput: firstnameInput,
+                lastnameInput: lastnameInput,
+                usernameInput: usernameInput,
+                passwordInput: passwordInput,
+                repeatPasswordInput: repeatPasswordInput,
+                userAccount: userAccount,
+                oldUsername: userSession.sessionData.username,
+                csrfToken: csrfToken
+            })
+        }   
     
     await change_profile_details.fillInExistingValues(modifiedUserDetails, userSession.sessionData.username)
     await change_profile_details.updateUserDetailsByID(modifiedUserDetails, userAccount._id, userSession.sessionData.username)
@@ -1340,11 +1340,13 @@ app.post("/change-profile-details", async (req, res) => {
     await session_management.updateSession(sessionID, userSession)
 
     if (userSession.sessionData.role === "member"){
+        await csrf_protection.cancelToken(sessionID)
         res.render("updated_profile_details_alert", {
             layout: undefined,
             userIsMember: true
         })
     } else if (userSession.sessionData.role === "admin"){
+        await csrf_protection.cancelToken(sessionID)
         res.render("updated_profile_details_alert", {
             layout: undefined,
             userIsAdmin: true
