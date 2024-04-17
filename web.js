@@ -1066,6 +1066,16 @@ app.get("/change-profile-details", async (req, res) => {
 
     let userAccount = await change_profile_details.findUserAccount(userSession.sessionData.username)
 
+    /*CSRF EXAMPLE FROM LAB 8:
+    let csrfToken = await business.generateCSRFToken(key)
+
+    res.render('applications', {
+        layout: undefined,
+        applications: apps,
+        csrfToken: csrfToken
+    })
+    */
+
     res.render("change_profile_details", {
         layout: undefined,
         userAccount: userAccount,
@@ -1302,10 +1312,30 @@ app.post("/change-profile-details", async (req, res) => {
         }
     }
 
+    /*CONTINUED CSRF EXAMPLE FROM LAB 8 (NOTE: YOU MAY NEED TO RENDER THE CSRF TOKEN EVERYTIME THE PAGE IS RENDERED DUE TO THE
+    ERROR MESSAGES, BUT PLEASE CHECK IF THIS IS NECESSARY IN YOUR IMPLEMENTATION):
+    
+        let sd = await business.getSession(key)
+        let csrfToken = req.body.csrfToken
+
+        if (csrfToken !== sd.csrfToken){
+            res.status(419)
+            res.send("CSRF token mismatch, approval process rejected") //RENDER FLASH MESSAGE TELLING THE USER THAT THE REQUEST 
+                                                                         WAS NOT PROCESSED IF THE CSRF TOKENS DO NOT MATCH
+            return
+        }
+
+        //CONTINUE WITH THE APPROVAL PROCESS IF THE CSRF TOKENS MATCH
+        let email = req.body.email
+        await business.approveRegistration(email)
+        await business.cancelCSRFToken()
+        
+        res.redirect('/application')
+        */
     
     await change_profile_details.fillInExistingValues(modifiedUserDetails, userSession.sessionData.username)
     await change_profile_details.updateUserDetailsByID(modifiedUserDetails, userAccount._id, userSession.sessionData.username)
-    
+
     userSession.sessionData.username = modifiedUserDetails.username
     await session_management.updateSession(sessionID, userSession)
 
@@ -1351,6 +1381,16 @@ app.get('/posts', async (req, res) => {
 
         return
     }
+
+    /*CSRF EXAMPLE FROM LAB 8:
+    let csrfToken = await business.generateCSRFToken(key)
+
+    res.render('applications', {
+        layout: undefined,
+        applications: apps,
+        csrfToken: csrfToken
+    })
+    */
     res.render("posts", {
         layout: undefined,
         locations: dbPosts,
@@ -1361,12 +1401,24 @@ app.get('/posts', async (req, res) => {
 
 
 app.post('/posts', async (req, res) => {
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
+
+    // If the browser cookie does not exist, or the user session in the database does not exist, then start a new user
+    // session, create a new browser cookie containing the sessionID, and set a flash message telling the user that the
+    // session has expired, and that he should login again, then redirect to the login page and exit the function
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please login again.")
+        res.redirect("/login")
+
+        return
+    }
     
     if ((sessionID && userSession) && (userSession.sessionData.role !== "member" && userSession.sessionData.role !== "admin")) {
-
-
         await flash_messages.setFlash(userSession.sessionID, "You must be signed in to be able to post.")
         res.redirect("/login")
         return
@@ -1392,7 +1444,27 @@ app.post('/posts', async (req, res) => {
                 water_bowl: req.body.water_bowl === 'true'
             },
             file_path: fileName
-        };
+        }
+
+
+        /*CONTINUED CSRF EXAMPLE FROM LAB 8:
+        let sd = await business.getSession(key)
+        let csrfToken = req.body.csrfToken
+
+        if (csrfToken !== sd.csrfToken){
+            res.status(419)
+            res.send("CSRF token mismatch, approval process rejected") //RENDER FLASH MESSAGE TELLING THE USER THAT THE REQUEST 
+                                                                         WAS NOT PROCESSED
+            return
+        }
+
+        //CONTINUE WITH THE APPROVAL PROCESS IF THE CSRF TOKENS MATCH
+        let email = req.body.email
+        await business.approveRegistration(email)
+        await business.cancelCSRFToken()
+        
+        res.redirect('/application')
+        */
 
         await posts.updateLocations(req.body.location_name, userInput)
         await posts.insertPost(userInput)
