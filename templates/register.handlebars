@@ -135,6 +135,7 @@
                             <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-lock-locked"></use>
                             </svg></span>
                         <input class="form-control" type="password" placeholder="Repeat password" name="repeatPasswordInput">
+                        <input type="hidden" name="csrf" value="{{csrfToken}}"></input>
                         </div>
                         <!-- Create account button -->
                         <button class="btn btn-primary btn-lg mt-3" type="submit">Create Account</button>
@@ -189,6 +190,7 @@
                             <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-lock-locked"></use>
                             </svg></span>
                         <input class="form-control" type="password" placeholder="Repeat password" name="repeatPasswordInput" value={{{repeatPasswordInput}}}>
+                        <input type="hidden" name="csrf" value="{{csrfToken}}"></input>
                         </div>
                         <!-- Create account button -->
                         <button class="btn btn-primary btn-lg mt-3" type="submit">Create Account</button>

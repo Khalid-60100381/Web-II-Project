@@ -167,13 +167,15 @@ app.get("/login", async (req, res) => {
         return
     }
 
+    let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
     // Check and Retrieve any flash messages that are part of the user's current session
     let flashMessage = await flash_messages.getFlash(sessionID)
 
     // If no flash messages exist, then render the login page
     if (!flashMessage){
         res.render("login", {
-            layout: undefined
+            layout: undefined,
+            csrfToken
         })
     }
 
@@ -184,7 +186,8 @@ app.get("/login", async (req, res) => {
 
         res.render("login", {
             layout: undefined,
-            sessionExpiryError: sessionExpiryError
+            sessionExpiryError: sessionExpiryError,
+            csrfToken
         })
     }
 
@@ -195,7 +198,8 @@ app.get("/login", async (req, res) => {
 
         res.render("login", {
             layout: undefined,
-            sessionExpiryError: sessionExpiryError
+            sessionExpiryError: sessionExpiryError,
+            csrfToken
         })
     }
 
@@ -204,7 +208,8 @@ app.get("/login", async (req, res) => {
 
         res.render("login", {
             layout: undefined,
-            unauthorizedAccess: unauthorizedAccess
+            unauthorizedAccess: unauthorizedAccess,
+            csrfToken
         })
     }
     
@@ -216,7 +221,8 @@ app.get("/login", async (req, res) => {
 
         res.render("login", {
             layout: undefined,
-            registrationConfirmation: registrationConfirmation
+            registrationConfirmation: registrationConfirmation,
+            csrfToken
         })
     }
 
@@ -227,7 +233,8 @@ app.get("/login", async (req, res) => {
 
         res.render("login", {
             layout: undefined,
-            incorrectCredentials: incorrectCredentials
+            incorrectCredentials: incorrectCredentials,
+            csrfToken
         })
     }
 
@@ -238,7 +245,8 @@ app.get("/login", async (req, res) => {
 
         res.render("login", {
             layout: undefined,
-            unauthorizedAccess: unauthorizedAccess
+            unauthorizedAccess: unauthorizedAccess,
+            csrfToken
         })
     }
 
@@ -247,8 +255,20 @@ app.get("/login", async (req, res) => {
 
         res.render("login", {
             layout: undefined,
-            sessionExpiryError: sessionExpiryError
+            sessionExpiryError: sessionExpiryError,
+            csrfToken
         })
+    }
+    
+    if (flashMessage === "CSRF token mismatch, approval process rejected"){
+        let unauthorizedAccess = flashMessage
+
+        res.render("login", {
+            layout: undefined,
+            unauthorizedAccess: unauthorizedAccess,
+            csrfToken
+        })
+    
     }
 
     if (flashMessage === "Password reset successfully."){
@@ -256,7 +276,8 @@ app.get("/login", async (req, res) => {
 
         res.render("login", {
             layout: undefined,
-            passwordResetSuccess: passwordResetSuccess
+            passwordResetSuccess: passwordResetSuccess,
+            csrfToken
         })
     
     }
@@ -280,9 +301,11 @@ app.get("/register", async (req, res) => {
         return
     }
 
+    let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
     //If the current user's session passes all session validation, then render the register form
     res.render("register", {
-        layout:undefined
+        layout:undefined,
+        csrfToken
     })
 })
 
@@ -304,6 +327,7 @@ app.get("/member-page", async (req, res) => {
 
         return
     }
+    
 
     // If the user tries to directly access a protected route (/member-page) and the user's session data indicates that 
     // the user is not authenticated as either a member or admin, then set a flash message asking the user to login with 
@@ -316,7 +340,7 @@ app.get("/member-page", async (req, res) => {
     }
 
     // Check and Retrieve any flash messages that are part of the user's current session
-    let flashMessage = await flash_messages.getFlash(sessionID)
+
 
     // Handling the flash message for welcoming back the user by rendering the user_login_alert template which displays
     // the welcome back message, and redirects the user to the member page
@@ -337,7 +361,7 @@ app.get("/member-page", async (req, res) => {
 
     res.render("member_page",{
     layout:undefined,
-    locations: fixed_locations        
+    locations: fixed_locations      
     })
 })
 
@@ -358,6 +382,7 @@ app.get("/admin-page", async (req, res) => {
 
         return
     }
+
 
     // If the user tries to directly access a protected route (/admin-page) and the user's session data indicates that 
     // the user is not authenticated as an admin, then set a flash message asking the user to login with his account and 
@@ -410,6 +435,7 @@ app.get("/admin-home", async (req, res) => {
     
             return
         }
+
     
         // If the user tries to directly access a protected route (/admin-page) and the user's session data indicates that 
         // the user is not authenticated as an admin, then set a flash message asking the user to login with his account and 
@@ -446,6 +472,7 @@ app.get("/admin-home", async (req, res) => {
 })
 
 app.post("/login", async (req, res) => {
+    let csrfToken = req.body.csrf
     // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
@@ -474,7 +501,8 @@ app.post("/login", async (req, res) => {
     if (emptyFields) {
         return res.render("login", { 
             layout: undefined, 
-            emptyLoginFields: "All fields must be filled in"
+            emptyLoginFields: "All fields must be filled in",
+            csrfToken: csrfToken
         })
     }
 
@@ -489,6 +517,16 @@ app.post("/login", async (req, res) => {
 
         return
     }
+    
+    let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
+
+    if (!compareResult){
+        await csrf_protection.cancelToken(sessionID)
+        await flash_messages.setFlash(userSession.sessionID, "CSRF token mismatch, approval process rejected")
+        res.redirect("/login")
+
+        return
+    }   
 
     // If the user-inputted credentials are correct, then get the user's role stored in the user's account, modify the  
     // user's role in the session data to either "member" or "admin" based on his account role, and redirect the user 
@@ -501,6 +539,7 @@ app.post("/login", async (req, res) => {
         await session_management.updateSession(sessionID, userSession)
 
         await flash_messages.setFlash(userSession.sessionID, `Welcome Back ${usernameInput}!`)
+        await csrf_protection.cancelToken(sessionID)
         res.redirect("/member-page")
 
         return
@@ -512,6 +551,7 @@ app.post("/login", async (req, res) => {
         await session_management.updateSession(sessionID, userSession)
 
         await flash_messages.setFlash(userSession.sessionID, `Welcome Back ${usernameInput}!`)
+        await csrf_protection.cancelToken(sessionID)
         res.redirect("admin-page")
 
         return
@@ -520,6 +560,7 @@ app.post("/login", async (req, res) => {
 })
 
 app.post("/register", async (req, res) => {
+    let csrfToken = req.body.csrf
     // Retrieve all user field inputs from the registration form fields
     let firstnameInput = req.body.firstnameInput
     let lastnameInput = req.body.lastnameInput
@@ -541,7 +582,8 @@ app.post("/register", async (req, res) => {
             firstnameInput: firstnameInput,
             lastnameInput: lastnameInput,
             emailInput: emailInput,
-            usernameInput: usernameInput
+            usernameInput: usernameInput,
+            csrfToken: csrfToken
         })
     }
 
@@ -559,7 +601,8 @@ app.post("/register", async (req, res) => {
             emailInput: emailInput,
             usernameInput: usernameInput,
             passwordInput: passwordInput,
-            repeatPasswordInput: repeatPasswordInput
+            repeatPasswordInput: repeatPasswordInput,
+            csrfToken: csrfToken
         })
     }
 
@@ -579,7 +622,8 @@ app.post("/register", async (req, res) => {
             emailInput: emailInput,
             usernameInput: usernameInput,
             passwordInput: passwordInput,
-            repeatPasswordInput: repeatPasswordInput
+            repeatPasswordInput: repeatPasswordInput,
+            csrfToken: csrfToken
         })
     }
 
@@ -612,7 +656,8 @@ app.post("/register", async (req, res) => {
             firstnameInput: firstnameInput,
             lastnameInput: lastnameInput,
             emailInput: emailInput,
-            usernameInput: usernameInput
+            usernameInput: usernameInput,
+            csrfToken: csrfToken
         })
     }
 
@@ -640,7 +685,8 @@ app.post("/register", async (req, res) => {
             lastnameInput: lastnameInput,
             emailInput: emailInput,
             passwordInput: passwordInput,
-            repeatPasswordInput: repeatPasswordInput
+            repeatPasswordInput: repeatPasswordInput,
+            csrfToken: csrfToken
         })
     }
 
@@ -658,7 +704,8 @@ app.post("/register", async (req, res) => {
             lastnameInput: lastnameInput,
             usernameInput: usernameInput,
             passwordInput: passwordInput,
-            repeatPasswordInput: repeatPasswordInput
+            repeatPasswordInput: repeatPasswordInput,
+            csrfToken: csrfToken
         })
     }
 
@@ -676,7 +723,8 @@ app.post("/register", async (req, res) => {
             lastnameInput: lastnameInput,
             emailInput: emailInput,
             passwordInput: passwordInput,
-            repeatPasswordInput: repeatPasswordInput
+            repeatPasswordInput: repeatPasswordInput,
+            csrfToken: csrfToken
         })
     }
 
@@ -694,7 +742,8 @@ app.post("/register", async (req, res) => {
             lastnameInput: lastnameInput,
             usernameInput: usernameInput,
             passwordInput: passwordInput,
-            repeatPasswordInput: repeatPasswordInput
+            repeatPasswordInput: repeatPasswordInput,
+            csrfToken: csrfToken
         })
     }
 
@@ -726,6 +775,21 @@ app.post("/register", async (req, res) => {
         return
     }
 
+    let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
+
+    if (!compareResult){
+        return res.render("register", { 
+            layout: undefined, 
+            errorMessage: "CSRF token mismatch, approval process rejected", 
+            firstnameInput: firstnameInput,
+            lastnameInput: lastnameInput,
+            emailInput: emailInput,
+            usernameInput: usernameInput,
+            passwordInput: passwordInput,
+            repeatPasswordInput: repeatPasswordInput,
+            csrfToken: csrfToken
+        })
+    }   
     // Pass user details to account_registration business sub-layer to hash + salt user password
     let accountRegistered = await account_registration.registerAccount(userDetails)
 
@@ -733,6 +797,7 @@ app.post("/register", async (req, res) => {
     // that the account registration is successful, and that he should log in, then redirect to the login page
     if (accountRegistered){
         await flash_messages.setFlash(userSession.sessionID, "Account has been successfully registered! Please log in.")
+        await csrf_protection.cancelToken(sessionID)
         res.redirect("/login")
     }
 })
@@ -816,6 +881,7 @@ app.get("/forgot-password", async(req, res) => {
 
         return
     }
+    let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
 
     // Check and Retrieve any flash messages that are part of the user's current session
     let flashMessage = await flash_messages.getFlash(sessionID)
@@ -827,7 +893,8 @@ app.get("/forgot-password", async(req, res) => {
 
         res.render("forgot_password", {
             layout: undefined,
-            invalidEmail: invalidEmail
+            invalidEmail: invalidEmail,
+            csrfToken: csrfToken
         })
 
         return
@@ -840,7 +907,8 @@ app.get("/forgot-password", async(req, res) => {
 
         res.render("forgot_password", {
             layout: undefined,
-            emailLinkSent: emailLinkSent
+            emailLinkSent: emailLinkSent,
+            csrfToken: csrfToken
         })
 
         return
@@ -853,7 +921,20 @@ app.get("/forgot-password", async(req, res) => {
 
         res.render("forgot_password", {
             layout: undefined,
-            invalidResetKey: invalidResetKey
+            invalidResetKey: invalidResetKey,
+            csrfToken: csrfToken
+        })
+
+        return
+    }
+
+    if (flashMessage === "CSRF token mismatch, approval process rejected"){
+        let invalidResetKey = flashMessage
+
+        res.render("forgot_password", {
+            layout: undefined,
+            invalidResetKey: invalidResetKey,
+            csrfToken: csrfToken
         })
 
         return
@@ -861,13 +942,15 @@ app.get("/forgot-password", async(req, res) => {
 
     // If not flash messages exist, then render the forgot password page
     res.render("forgot_password", {
-        layout: undefined
+        layout: undefined,
+        csrfToken: csrfToken
     })
     
 })
 
 
 app.post("/submit-email", async(req, res) => {
+    let csrfToken = req.body.csrf
     // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
@@ -899,6 +982,15 @@ app.post("/submit-email", async(req, res) => {
         return
     }
 
+    let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
+
+    if (!compareResult){
+        await flash_messages.setFlash(userSession.sessionID, "CSRF token mismatch, approval process rejected")
+        res.redirect("/forgot-password")
+
+        return
+    }   
+
     // If the email exists in the database, then send a password reset link to the user's email, and set a flash message
     // telling the user that a link has been sent to his email, then redirect to the forgot password page
     await passwordReset.resetPassword(emailInput)
@@ -906,6 +998,7 @@ app.post("/submit-email", async(req, res) => {
 
 
     // Redirect to the forgot password page
+    await csrf_protection.cancelToken(sessionID)
     res.redirect("/forgot-password")
 
 })
@@ -928,6 +1021,7 @@ app.get('/reset-password', async (req, res) => {
 
         return
     }
+    let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
 
     // Check if the reset key exists in the database
     let checkResetKey = await passwordReset.checkResetKey(req.query.key)
@@ -944,12 +1038,14 @@ app.get('/reset-password', async (req, res) => {
     // If the reset key exists in the database, then render the reset password page
     res.render('reset_password', {
         layout: undefined,
-        resetKey: req.query.key
+        resetKey: req.query.key,
+        csrfToken: csrfToken
     })
 })
 
 
 app.post('/reset-password', async (req, res) => {
+    let csrfToken = req.body.csrf
     // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
@@ -981,7 +1077,8 @@ app.post('/reset-password', async (req, res) => {
         res.render("reset_password", {
             layout: undefined, 
             errorMessage: "All fields must be filled in.",
-            resetKey: resetKey
+            resetKey: resetKey,
+            csrfToken: csrfToken
         })
 
         return
@@ -1003,7 +1100,8 @@ app.post('/reset-password', async (req, res) => {
                            - Contain at least one digit
                            - Contain at least one symbol
                            - Contain no whitespaces`,
-            resetKey: resetKey
+            resetKey: resetKey,
+            csrfToken: csrfToken
         })
 
         return
@@ -1018,19 +1116,33 @@ app.post('/reset-password', async (req, res) => {
         res.render("reset_password", {
             layout: undefined, 
             errorMessage: "Passwords do not match.",
-            resetKey: resetKey
+            resetKey: resetKey,
+            csrfToken: csrfToken
         })
 
         return
     }
 
-    
+    let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
+
+    if (!compareResult){
+        await csrf_protection.cancelToken(sessionID)
+        res.render("reset_password", {
+            layout: undefined, 
+            errorMessage: "CSRF token mismatch, approval process rejected",
+            resetKey: resetKey,
+            csrfToken: csrfToken
+        })
+
+        return
+    }   
 
     // Pass the new password and reset key to the password reset sub-layer to update the user's password in the database
     // and set a flash message telling the user that the password has been reset successfully
     await passwordReset.setNewPassword(resetKey, newPassword)
     await flash_messages.setFlash(userSession.sessionID, "Password reset successfully.")
 
+    await csrf_protection.cancelToken(sessionID)
     // Redirect to the login page
     res.redirect("/login")
 })
@@ -1313,10 +1425,9 @@ app.post("/change-profile-details", async (req, res) => {
         }
     }
         let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
-        console.log(compareResult)
+
         if (!compareResult){
             await csrf_protection.cancelToken(sessionID)
-            console.log("after cancel:" + compareResult)
             return res.render("change_profile_details", { 
                 layout: undefined, 
                 errorMessage: "CSRF token mismatch, approval process rejected", 
@@ -1361,6 +1472,7 @@ app.get('/posts', async (req, res) => {
 
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
+    let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
 
     if ((sessionID && userSession) && (userSession.sessionData.role === "admin")) {
 
@@ -1368,41 +1480,36 @@ app.get('/posts', async (req, res) => {
             layout: undefined,
             userIsAdmin: true,
             locations: dbPosts,
-            fixedlocations: fixed_locations
+            fixedlocations: fixed_locations,
+            csrfToken
         })
 
         return
     }
+
     if((sessionID && userSession) && (userSession.sessionData.role === "member")){
         res.render("posts", {
             layout: undefined,
             userIsMember: true,
             locations: dbPosts,
-            fixedlocations: fixed_locations
+            fixedlocations: fixed_locations,
+            csrfToken
         })
 
         return
     }
-
-    /*CSRF EXAMPLE FROM LAB 8:
-    let csrfToken = await business.generateCSRFToken(key)
-
-    res.render('applications', {
-        layout: undefined,
-        applications: apps,
-        csrfToken: csrfToken
-    })
-    */
     res.render("posts", {
         layout: undefined,
         locations: dbPosts,
-        fixedlocations: fixed_locations
+        fixedlocations: fixed_locations,
+        csrfToken
     })
 
 })
 
 
 app.post('/posts', async (req, res) => {
+    let csrfToken = req.body.csrf
     // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
@@ -1425,6 +1532,17 @@ app.post('/posts', async (req, res) => {
         res.redirect("/login")
         return
     }
+
+    let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
+
+    if (!compareResult){
+        await csrf_protection.cancelToken(sessionID)
+        await flash_messages.setFlash(userSession.sessionID, "CSRF token mismatch, approval process rejected")
+        res.redirect("/login")
+        return
+    }   
+    
+
     if(req.files && req.files.submission){
 
         let theFile = req.files.submission;
@@ -1448,32 +1566,12 @@ app.post('/posts', async (req, res) => {
             file_path: fileName
         }
 
-
-        /*CONTINUED CSRF EXAMPLE FROM LAB 8:
-        let sd = await business.getSession(key)
-        let csrfToken = req.body.csrfToken
-
-        if (csrfToken !== sd.csrfToken){
-            res.status(419)
-            res.send("CSRF token mismatch, approval process rejected") //RENDER FLASH MESSAGE TELLING THE USER THAT THE REQUEST 
-                                                                         WAS NOT PROCESSED
-            return
-        }
-
-        //CONTINUE WITH THE APPROVAL PROCESS IF THE CSRF TOKENS MATCH
-        let email = req.body.email
-        await business.approveRegistration(email)
-        await business.cancelCSRFToken()
-        
-        res.redirect('/application')
-        */
-
         await posts.updateLocations(req.body.location_name, userInput)
         await posts.insertPost(userInput)
+        await csrf_protection.cancelToken(sessionID)
         res.redirect('/posts')
 
     }else{
-
         let userInput = {
             username: userSession.sessionData.username,
             name: req.body.location_name,
@@ -1491,6 +1589,7 @@ app.post('/posts', async (req, res) => {
 
         await posts.updateLocations(req.body.location_name, userInput)
         await posts.insertPost(userInput)
+        await csrf_protection.cancelToken(sessionID)
         res.redirect('/posts')
     }
 })
