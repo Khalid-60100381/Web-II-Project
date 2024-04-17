@@ -5,25 +5,22 @@
                       <table class="table border mb-0">
                         <thead class="table-light fw-semibold">
                           <tr class="align-middle">
-                            <th>Feeding Station #</th>
                             <th class="text-center">Location</th>
-                            <th>Food and Water Levels</th>
+                            <th class="text-center">Food and Water Levels</th>
                             <th class="text-center"># of Cats</th>
-                            <th>Health Status</th>
-                            <th>Critical Items</th>
+                            <th class="text-center">Health Status</th>
+                            <th class="text-center">Critical Items</th>
+                            <th class="text-center">Last Visit/Update</th>
                           </tr>
                         </thead>
                        <tbody>
                           {{#each locations as |locations|}}
                          <tr class="align-middle">
-                            <td>
-                              <div>{{locations.number}}</div>
-                              <div class="small text-medium-emphasis"><span>Info:</span> | {{locations.info}}</div>
+
+                            <td class="text-center">
+                              <div class="fw-semibold">{{locations.name}}</div>
                             </td>
                             <td class="text-center">
-                              <div>{{locations.name}}</div>
-                            </td>
-                            <td>
                               <div class="clearfix">
                                 <div class="float-start">
                                   <div class="fw-semibold">{{locations.food_level}}</div>
@@ -46,19 +43,19 @@
                           <td class="text-center">
                             <div>{{locations.cat_number}}</div> <!-- Assuming you have a property like this -->
                           </td>
-                          <td>
+                          <td class="text-center">
                             <!-- Activity info, modify as needed -->
-                            <div class="small text-medium-emphasis">Health Issues:</div>
-                            <div class="fw-semibold">{{locations.health_issue}}</div> <!-- Assuming you store last update date -->
+                            <div class="fw-semibold">Health Issues:</div>
+                            <div><i>{{locations.health_issue}}</i></div> <!-- Assuming you store last update date -->
                           </td>
                           <td class="text-center">
-                            <div>
+                            <div >
                               <div class="fw-semibold">LitterBox:</div>
                               <p>
                                 {{#if locations.critical_item.letterbox}}
-                                Available
+                                <i>Available</i>
                                 {{else}}
-                                Missing
+                                <i>Missing</i>
                                 {{/if}}
                               </p>
                             </div>
@@ -66,9 +63,9 @@
                               <div class="fw-semibold">Food Bowl:</div>
                               <p>
                                 {{#if locations.critical_item.food_bowl}}
-                                Available
+                                <i>Available</i>
                                 {{else}}
-                                Missing
+                                <i>Missing</i>
                                 {{/if}}
                               </p>
                             </div>
@@ -76,12 +73,15 @@
                               <div class="fw-semibold">Water Bowl:</div>
                               <p>
                                 {{#if locations.critical_item.water_bowl}}
-                                Available
+                               <i> Available</i>
                                 {{else}}
-                                Missing
+                               <i> Missing</i>
                                 {{/if}}
                               </p>
                             </div>
+                          </td>
+                          <td class="text-center">
+                            <div class="fw-semibold">Last Update was from:<br></div><i>{{formatLastUpdated locations.lastUpdated}}</i></div> <!-- Assuming you have a property like this -->
                           </td>
                         </tr>
                         {{/each}}
@@ -91,3 +91,4 @@
             </div>
             </div>
            </div>
+           

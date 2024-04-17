@@ -160,6 +160,8 @@
             <li class="nav-item">
                 <a href="/register" class="nav-link">Register</a>
             </li>
+            <br></br>
+            <br>
           {{/noneAreTrue}}
           <!-- Display member dashboard and logout links if the user is a member -->
           {{#if userIsMember}}
@@ -178,6 +180,8 @@
             <li class="nav-item">
               <a href="/logout" class="nav-link">Log Out</a>
             </li>
+            <br></br>
+            <br>
             <li class="nav-item">
               <button class="btn btn-primary" type="button" data-coreui-toggle="modal" data-coreui-target="#updateSiteModal">
                   <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
@@ -204,6 +208,8 @@
             <li class="nav-item">
               <a href="/logout" class="nav-link">Log Out</a>
             </li>
+            <br></br>
+            <br>
             <li class="nav-item">
               <button class="btn btn-primary" type="button" data-coreui-toggle="modal" data-coreui-target="#updateSiteModal">
                   <svg class="me-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
@@ -295,22 +301,26 @@
         <div class="col-md-4 mb-4">
             <div class="card">
                 <div class="card-header">
-                    {{location.username}}
+                    Posted at: <strong>r/{{location.name}}</strong><br>
+                    <i>{{formatLastUpdated location.lastUpdated}} ago</i>
                 </div>
                 <div class="card-body">
-                    <!-- Display Last Updated Time -->
-                    <p class="text-muted">Last Updated: {{formatLastUpdated location.lastUpdated}}</p>
-                    <h5 class="card-title">{{location.name}}</h5>
-                    <p>{{location.text_post}}</p>
-                    <p class="card-text">{{location.info}}</p>
+                    <h6 class="card-title fw-semibold">u/{{capitalizeFirst location.username}} Says:</h6>
+                    <p class="card-text">{{location.text_post}}</p>
+                    {{#if location.file_path}}
+                    <div class="fw-semibold">Posted an Image:</div>
+                    <div>
+                        <img src="/uploads/{{location.file_path}}" class="card-img-top mb-3" alt="Feeding Station Image">
+                    </div>
+                    {{/if}}
                     <div class="mb-2">
-                        <label class="form-label">Food Level:</label>
+                        <label class="form-label"><strong>Food Level:</strong></label>
                         <div class="progress">
                             <div class="progress-bar bg-success" role="progressbar" style="width: {{location.food_level}};" aria-valuenow="{{location.food_level}}" aria-valuemin="0" aria-valuemax="100">{{location.food_level}}</div>
                         </div>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">Water Level:</label>
+                        <label class="form-label"><strong>Water Level:</strong></label>
                         <div class="progress">
                             <div class="progress-bar bg-info" role="progressbar" style="width: {{location.water_level}};" aria-valuenow="{{location.water_level}}" aria-valuemin="0" aria-valuemax="100">{{location.water_level}}</div>
                         </div>
@@ -350,11 +360,6 @@
                             </li>
                         </ul>
                     </div>
-                    {{#if location.file_path}}
-                    <div>
-                        <img src="/uploads/{{location.file_path}}" class="card-img-top mb-3" alt="Feeding Station Image">
-                    </div>
-                    {{/if}}
                 </div>
             </div>
         </div>

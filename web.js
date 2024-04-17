@@ -45,6 +45,10 @@ handlebars.registerHelper('eq', function (val1, val2) {
     return val1 === val2;
   });
 
+  handlebars.registerHelper('capitalizeFirst', function(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+});
+
 //Handlebars helper function to format last updated time
 handlebars.registerHelper('formatLastUpdated', function(lastUpdated) {
     // Calculate the time difference between now and the last updated time
@@ -1321,7 +1325,7 @@ app.get('/posts', async (req, res) => {
             locations: dbPosts,
             fixedlocations: fixed_locations
         })
-        
+
         return
     }
     res.render("posts", {
@@ -1376,6 +1380,7 @@ app.post('/posts', async (req, res) => {
         let userInput = {
             username: userSession.sessionData.username,
             name: req.body.location_name,
+            text_post: req.body.text_post,
             food_level: req.body.food_level,
             water_level: req.body.water_level,
             cat_number: req.body.number_of_cats, // Assuming this should be a number
