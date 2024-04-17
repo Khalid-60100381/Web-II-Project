@@ -1068,7 +1068,8 @@ app.get("/change-profile-details", async (req, res) => {
 
     res.render("change_profile_details", {
         layout: undefined,
-        userAccount: userAccount
+        userAccount: userAccount,
+        oldUsername: userSession.sessionData.username
     })
 })
 
@@ -1120,14 +1121,15 @@ app.post("/change-profile-details", async (req, res) => {
 
         //If firstname or lastname does not consist of letters only
         if (!firstnameLastnameValidated){
-            return res.render("register", { 
+            return res.render("change_profile_details", { 
                 layout: undefined, 
                 errorMessage: "Firstname and lastname must contain letters only", 
                 // Pass all form inputs back to the template for repopulating the form, and display error message
                 emailInput: emailInput,
                 usernameInput: usernameInput,
                 passwordInput: passwordInput,
-                repeatPasswordInput: repeatPasswordInput
+                repeatPasswordInput: repeatPasswordInput,
+                oldUsername: userSession.sessionData.username
             })
         }
 
@@ -1156,7 +1158,8 @@ app.post("/change-profile-details", async (req, res) => {
                 lastnameInput: lastnameInput,
                 emailInput: emailInput,
                 usernameInput: usernameInput,
-                userAccount: userAccount
+                userAccount: userAccount,
+                oldUsername: userSession.sessionData.username
             })
         }
 
@@ -1185,12 +1188,14 @@ app.post("/change-profile-details", async (req, res) => {
                 lastnameInput: lastnameInput,
                 emailInput: emailInput,
                 usernameInput: usernameInput,
-                userAccount: userAccount
+                userAccount: userAccount,
+                oldUsername: userSession.sessionData.username
             })
         }
 
         if (passwordsMatch && passwordComplexityValidated){
             modifiedUserDetails.password = passwordInput
+            
         }
     }
 
@@ -1220,7 +1225,8 @@ app.post("/change-profile-details", async (req, res) => {
                 emailInput: emailInput,
                 passwordInput: passwordInput,
                 repeatPasswordInput: repeatPasswordInput,
-                userAccount: userAccount
+                userAccount: userAccount,
+                oldUsername: userSession.sessionData.username
             })
         }
 
@@ -1239,7 +1245,8 @@ app.post("/change-profile-details", async (req, res) => {
                 emailInput: emailInput,
                 passwordInput: passwordInput,
                 repeatPasswordInput: repeatPasswordInput,
-                userAccount: userAccount
+                userAccount: userAccount,
+                oldUsername: userSession.sessionData.username
             })
         }
 
@@ -1265,7 +1272,8 @@ app.post("/change-profile-details", async (req, res) => {
                 usernameInput: usernameInput,
                 passwordInput: passwordInput,
                 repeatPasswordInput: repeatPasswordInput,
-                userAccount: userAccount
+                userAccount: userAccount,
+                oldUsername: userSession.sessionData.username
             })
         }
 
@@ -1284,7 +1292,8 @@ app.post("/change-profile-details", async (req, res) => {
                 usernameInput: usernameInput,
                 passwordInput: passwordInput,
                 repeatPasswordInput: repeatPasswordInput,
-                userAccount: userAccount
+                userAccount: userAccount,
+                oldUsername: userSession.sessionData.username
             })
         }
 
@@ -1293,10 +1302,24 @@ app.post("/change-profile-details", async (req, res) => {
         }
     }
 
-    await change_profile_details.fillInExistingValues(modifiedUserDetails, userAccount.userDetails)
+    
+    await change_profile_details.fillInExistingValues(modifiedUserDetails, userSession.sessionData.username)
     await change_profile_details.updateUserDetailsByID(modifiedUserDetails, userAccount._id, userSession.sessionData.username)
+    
+    userSession.sessionData.username = modifiedUserDetails.username
+    await session_management.updateSession(sessionID, userSession)
 
-    res.redirect("/member-page")
+    if (userSession.sessionData.role === "member"){
+        res.render("updated_profile_details_alert", {
+            layout: undefined,
+            userIsMember: true
+        })
+    } else if (userSession.sessionData.role === "admin"){
+        res.render("updated_profile_details_alert", {
+            layout: undefined,
+            userIsAdmin: true
+        })
+    }
 })
 
 

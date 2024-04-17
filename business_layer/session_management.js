@@ -24,7 +24,7 @@ async function startSession(sessionData){
     let userSession = {
         sessionID: sessionID,
         sessionData: sessionData,
-        sessionExpiry: new Date(Date.now() + 1000*60*10)
+        sessionExpiry: new Date(Date.now() + 1000*60*20)
     }
 
     //Store user's session data in the database, and return the session data to the web layer to set browser cookie

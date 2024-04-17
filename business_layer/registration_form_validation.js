@@ -163,6 +163,7 @@ async function checkEmailExists(emailInput){
  */
 async function validateEmail(emailInput){
     const re = new RegExp("^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-_]{2,63}$")
+    
     if(re.test(emailInput)){
         return true
     }
