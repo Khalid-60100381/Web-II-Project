@@ -23,7 +23,6 @@ async function fillInExistingValues(modifiedUserDetails, username) {
         if (key === "password") {
             // Check if the password property is empty
             if (modifiedUserDetails[key] !== "") {
-                console.log("hi")
                 continue
             }
         }

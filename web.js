@@ -1379,7 +1379,6 @@ app.post("/change-profile-details", async (req, res) => {
     if (emailInput !== userAccount.userDetails.email) {
         //Validates the email format of user-inputted email
         let emailValidated = await registration_form_validation.validateEmail(emailInput)
-        console.log(emailValidated)
 
         //If email does not meet criteria
         if (!emailValidated){
@@ -1435,6 +1434,7 @@ app.post("/change-profile-details", async (req, res) => {
                 // and display error message
                 firstnameInput: firstnameInput,
                 lastnameInput: lastnameInput,
+                emailInput: emailInput,
                 usernameInput: usernameInput,
                 passwordInput: passwordInput,
                 repeatPasswordInput: repeatPasswordInput,
