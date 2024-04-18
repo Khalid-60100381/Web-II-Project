@@ -1,9 +1,9 @@
-### INFS3201 Project
+# INFS3201 Project
 This website allows you to monitor feeding stations around Qatar for stray cats
 A project for the INFS3201 course in "UDST" inspired by Task8 from the Genius Group Winter 24 competition.
 It is built using ExpressJS.
 
-# Frameworks
+## Frameworks
 The following packages were used in this project:
 - express
 - express-handlebars
@@ -13,6 +13,7 @@ The following packages were used in this project:
 - mongodb
 - crypto
 - password-validator
+- express-fileupload
 
 ## Installation
 1. Clone the repo:
@@ -31,18 +32,27 @@ Our application uses MongoDB to store and manage data efficiently. Check the ```
 Visit the site using localhost on port 8000:
 ```http://127.0.0.1:8000/```
 
-# Test Accounts info:
+Run the progarm by typing in powershell:
+```bash
+node web.js
+```
 
-# Admin:
+or if you have nodemon installed:
+```bash
+nodemon web.js
+```
+
+# Test Accounts info:
+## Admin:
 > **User**: `admin`
 > **Password**: `Admin@123` 
 
-# Member:
+## Member:
 > **User:** `member`  
 > **Password:** `Member@123`
 
-## Features
-# Milestone Submission (24/03/2024):
+# Features
+## Milestone Submission (24/03/2024):
 - A public viewers page that dynamically loads the list of locations from the database
 - A map the also shows the locations as markers, also loaded from the database.
 - Session management system, keeps tracks of the user current state.
@@ -52,6 +62,18 @@ Visit the site using localhost on port 8000:
 - Registration form validation.
 - Hashing user passwords.
 - Error 404 Page.
+
+## Final Submission (18/04/2024):
+The Following Featuers has been added:
+- CSRF protection on all pages
+- Posts creation (only for registered users)
+- View created posts
+- Ability to update feeding stations info
+- Admin dashboard, viewing the active stations and all info about them
+- Password Reset
+- Manage Credentials
+- File Upload (uploading a single image)
+- About us page was added
 
 ## Credits
 Almabrouk Ben-Omran - 60104920

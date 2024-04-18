@@ -3,14 +3,6 @@ const persistence = require("../persistence.js")
 const crypto = require("crypto")
 
 
-async function isSHA512Hash(inputString) {
-    // Create a regular expression to match SHA-512 hashes
-    const sha512Pattern = new RegExp("^[a-fA-F0-9]{128}$")
-
-    // Test the input string against the pattern
-    return sha512Pattern.test(inputString);
-}
-
 async function findUserAccount(username){
     return await persistence.findUserAccount(username)
 }
