@@ -340,7 +340,7 @@ app.get("/member-page", async (req, res) => {
     }
 
     // Check and Retrieve any flash messages that are part of the user's current session
-
+    let flashMessage = await flash_messages.getFlash(sessionID)
 
     // Handling the flash message for welcoming back the user by rendering the user_login_alert template which displays
     // the welcome back message, and redirects the user to the member page
@@ -1470,11 +1470,23 @@ app.get('/posts', async (req, res) => {
     const dbPosts = await posts.getPosts()
     const fixed_locations = await location.getlocations()
 
+
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
-    let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
+
+    if (!sessionID || !userSession) {
+        let newUserSession = await session_management.startSession({role: "publicViewer"})
+        res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
+
+        await flash_messages.setFlash(newUserSession.sessionID, "Session expired, Please login again.")
+        res.redirect("/login")
+
+        return
+    }
 
     if ((sessionID && userSession) && (userSession.sessionData.role === "admin")) {
+
+        let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
 
         res.render("posts", {
             layout: undefined,
@@ -1488,6 +1500,9 @@ app.get('/posts', async (req, res) => {
     }
 
     if((sessionID && userSession) && (userSession.sessionData.role === "member")){
+
+        let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
+
         res.render("posts", {
             layout: undefined,
             userIsMember: true,
@@ -1501,8 +1516,7 @@ app.get('/posts', async (req, res) => {
     res.render("posts", {
         layout: undefined,
         locations: dbPosts,
-        fixedlocations: fixed_locations,
-        csrfToken
+        fixedlocations: fixed_locations
     })
 
 })

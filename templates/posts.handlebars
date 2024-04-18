@@ -284,11 +284,13 @@
                                     <label class="form-check-label" for="water_bowl">Water Bowl</label>
                                 </div>
                             </fieldset>
-                            <label for="file">Upload file:</label>
-                            <input type="file" id="file" name="submission">
-                            <br><br>
-                            <input type="hidden" name="csrf" value="{{csrfToken}}">
-                            <button type="submit" class="btn btn-success">Update Details</button>
+                            <fieldset class="mb-3">
+                                <label for="file">Upload file:</label>
+                                <input type="file" id="file" name="submission" accept="image/*">
+                                <br><br>
+                                <input type="hidden" name="csrf" value="{{csrfToken}}">
+                                <button type="submit" class="btn btn-primary">Update Details</button>
+                            </fieldset>
                         </form>
                     </div>
                 </div>
