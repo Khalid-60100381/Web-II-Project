@@ -3,11 +3,23 @@ const persistence = require("../persistence.js")
 const crypto = require("crypto")
 
 
+/**
+ * Retrieves the user account based on the provided username.
+ *
+ * @param {string} username - The username of the user account to retrieve.
+ * @returns {Promise<Object>} - A promise that resolves to the user account object, or null if the account is not found.
+ */
 async function findUserAccount(username){
     return await persistence.findUserAccount(username)
 }
 
-// Function to update modifiedUserDetails with existing values if properties are empty
+/**
+ * Updates the modifiedUserDetails object with existing values if the properties are empty.
+ *
+ * @param {Object} modifiedUserDetails - The user details to modify.
+ * @param {string} username - The username of the user account to retrieve existing details from.
+ * @returns {Promise<void>} - A promise that resolves when the operation is complete.
+ */
 async function fillInExistingValues(modifiedUserDetails, username) {
     let userAccount = await persistence.findUserAccount(username)
 
@@ -26,6 +38,14 @@ async function fillInExistingValues(modifiedUserDetails, username) {
     }
 }
 
+
+/**
+ * Updates the user account details based on the provided account ID.
+ *
+ * @param {Object} modifiedUserDetails - The modified user details to update.
+ * @param {string} previousAccountID - The account ID of the user to update.
+ * @returns {Promise<Object>} - A promise that resolves to the updated user account details.
+ */
 async function updateUserDetailsByID(modifiedUserDetails, previousAccountID) {
     // Check if the password property is empty
     if (!modifiedUserDetails.password) {

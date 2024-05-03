@@ -1,6 +1,5 @@
 const persistence = require("../persistence.js")
 const crypto = require('crypto')
-//const nodemailer = require('nodemailer')
 
 
 /**
@@ -59,28 +58,3 @@ async function setNewPassword(resetKey, newPassword) {
 module.exports = {
 resetPassword, checkResetKey, setNewPassword
 }
-
-//Just in case for later if we decide to use nodemailer
-    // let resetKey = crypto.randomUUID()
-    // details.resetKey = resetKey
-    // await persistence.updateUserDetails(details)
-
-    // let transporter = nodemailer.createTransport({
-    //     host: '127.0.0.1',
-    //     port: 25
-    // })
-
-    // let emailBody = `
-    // A password reset request has been made for your account. Please
-    // click on <a href="http://127.0.0.1:8000/reset-password/?resetKey=${resetKey}">this link</a>
-    // to set a new password for your account.
-    // `
-
-    // await transporter.sendMail({
-    //     from: "lab9@infs3203.com",
-    //     to: email,
-    //     subject: "Password Reset Request",
-    //     html: emailBody
-    // })
-
-    // console.log(emailBody)

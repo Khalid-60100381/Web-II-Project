@@ -158,6 +158,12 @@ async function getlocations(){
     return fixed_locations
 }
 
+
+/**
+ * Retrieves posts from the posts collection, sorted by the last updated date in descending order.
+ *
+ * @returns {Promise<Array<Object>>} - A promise that resolves to an array of post objects, sorted by last updated date in descending order.
+ */
 async function getPosts(){
     await connectDatabase()
     const cursor = await posts.find().sort({ lastUpdated: -1 }); // Pointer to the object list 
@@ -165,12 +171,27 @@ async function getPosts(){
     return pulledPosts
 }
 
+
+/**
+ * Inserts a new post into the posts collection.
+ *
+ * @param {Object} details - An object containing the details of the post to be inserted.
+ * @returns {Promise<Object>} - A promise that resolves to the result of the insertion operation.
+ */
 async function insertPost(details){
     await connectDatabase()
     const result = await posts.insertOne(details);
     return result
 }
 
+
+/**
+ * Updates location details in the locations collection based on the provided name.
+ *
+ * @param {string} name - The name of the location to update.
+ * @param {Object} details - An object containing the new details of the location.
+ * @returns {Promise<void>} - A promise that resolves when the update is complete.
+ */
 async function updateLocations(name, details){
     await connectDatabase();
     const query = { "name": name }
@@ -209,6 +230,14 @@ async function updateUserDetails(email, details) {
     await users.replaceOne({"userDetails.email":email}, details)
 }
 
+
+/**
+ * Updates the user details in the users collection based on the provided account ID.
+ *
+ * @param {Object} modifiedUserDetails - An object containing the modified user details to be updated.
+ * @param {string} previousAccountID - The account ID of the user to update.
+ * @returns {Promise<void>} - A promise that resolves when the update is complete.
+ */
 async function updateUserDetailsByID(modifiedUserDetails, previousAccountID) {
     await connectDatabase()
     let userDetails = modifiedUserDetails

@@ -28,7 +28,6 @@ app.use(fileUpload())
 app.use('/uploads', express.static('uploads'));
 
 
-//HandleBars Stuff
 //Initializing handelbars engine and templates directory
 app.set ('views', __dirname+"/templates")
 app.set('view engine', 'handlebars')
@@ -41,10 +40,12 @@ handlebars.registerHelper('noneAreTrue', function(v1, v2, v3, options) {
     return options.inverse(this);
 });
 
+// Handlebars helper function to check if a value is equal to another value
 handlebars.registerHelper('eq', function (val1, val2) {
     return val1 === val2;
   });
 
+// Handlebars helper function to capitalize the first letter of a string
   handlebars.registerHelper('capitalizeFirst', function(text) {
     return text.charAt(0).toUpperCase() + text.slice(1);
 });
@@ -76,9 +77,11 @@ app.engine('handlebars', engine({
         logicalAND: handlebars.helpers.logicalAND
     }
 }))
-//END OF HandleBars Stuff
+
+//**************************************** END OF HandleBars Stuff ***************************************//
 
 //Start of app
+
 //Landing Page:
 app.get("/", async (req, res) => {
     // Retrieve the current user's session ID from the cookie value, then check if the user's current sessionID 
@@ -140,8 +143,10 @@ app.get("/", async (req, res) => {
     // database are simultaneously deleted)
     res.cookie("sessionID", userSession.sessionID, {expires: userSession.sessionExpiry})
 
+    // Retrieve the list of fixed feeding site locations from the database
     const fixed_locations = await location.getlocations()
-        
+    
+    // Render the main landing page with the fixed locations
     res.render("landing_page", {
     layout:undefined,
     locations: fixed_locations
@@ -167,7 +172,9 @@ app.get("/login", async (req, res) => {
         return
     }
 
+    // Generate a new CSRF token for the login form
     let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
+
     // Check and Retrieve any flash messages that are part of the user's current session
     let flashMessage = await flash_messages.getFlash(sessionID)
 
@@ -203,6 +210,9 @@ app.get("/login", async (req, res) => {
         })
     }
 
+    // If a flash message exists storing the unauthorized access message coming from the GET 
+    // /member-page or admin-page routes, then render the unauthorized access message as part of the 
+    // login page
     if (flashMessage === "You must be signed in to be able to post."){
         let unauthorizedAccess = flashMessage
 
@@ -250,6 +260,8 @@ app.get("/login", async (req, res) => {
         })
     }
 
+    // If a flash message exists storing the session expiry error message coming from the POST 
+    // /reset-password route, then render the error message as part of the login page
     if (flashMessage === "Session expired, Please reset your password again."){
         let sessionExpiryError = flashMessage
 
@@ -260,6 +272,8 @@ app.get("/login", async (req, res) => {
         })
     }
     
+    // If a flash message exists storing the CSRF token mismatch message coming from the POST /login 
+    // route, then render the CSRF token mismatch message as part of the login page
     if (flashMessage === "CSRF token mismatch, approval process rejected"){
         let unauthorizedAccess = flashMessage
 
@@ -271,6 +285,8 @@ app.get("/login", async (req, res) => {
     
     }
 
+    // If a flash message exists storing the password reset success message coming from the POST 
+    // /reset-password route, then render the password reset success message as part of the login page
     if (flashMessage === "Password reset successfully."){
         let passwordResetSuccess = flashMessage
 
@@ -301,7 +317,9 @@ app.get("/register", async (req, res) => {
         return
     }
 
+    // Generate a new CSRF token for the register form
     let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
+
     //If the current user's session passes all session validation, then render the register form
     res.render("register", {
         layout:undefined,
@@ -359,6 +377,7 @@ app.get("/member-page", async (req, res) => {
     // Get the list of fixed locations and render the member page
     const fixed_locations = await location.getlocations()
 
+    // Render the member page with the fixed locations 
     res.render("member_page",{
     layout:undefined,
     locations: fixed_locations      
@@ -411,6 +430,7 @@ app.get("/admin-page", async (req, res) => {
         return
     }
     
+    // Get the list of fixed locations and render the admin dashboard page
     const fixed_locations = await location.getlocations()
     res.render("admin_dashboard",{
         layout:undefined,
@@ -464,6 +484,7 @@ app.get("/admin-home", async (req, res) => {
             return
         }
         
+        // Get the list of fixed locations and render the admin page
         const fixed_locations = await location.getlocations()
         res.render("admin_page",{
             layout:undefined,
@@ -518,8 +539,12 @@ app.post("/login", async (req, res) => {
         return
     }
     
+    // Compare the CSRF token provided by the user with the CSRF token stored in the user's session
     let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
 
+    // If the CSRF token does not match the token stored in the user's session, then cancel the token, 
+    // set a flash message telling the user that the approval process has been rejected, and redirect 
+    // the user to the login page
     if (!compareResult){
         await csrf_protection.cancelToken(sessionID)
         await flash_messages.setFlash(userSession.sessionID, "CSRF token mismatch, approval process rejected")
@@ -533,6 +558,9 @@ app.post("/login", async (req, res) => {
     // to either the member page or admin page 
     let userRole = await authorization.getUserRole(usernameInput)
 
+    // If the user is a member, then set the user's role in the session data to "member", update the 
+    // user's session in the database, set a flash message welcoming the user back, cancel the CSRF 
+    // token, and redirect the user to the member page 
     if (userRole === "member"){
         userSession.sessionData.role = "member"
         userSession.sessionData.username = usernameInput
@@ -775,8 +803,12 @@ app.post("/register", async (req, res) => {
         return
     }
 
+    // Compare the CSRF token generated during the GET /register route with the CSRF token generated during the
+    // POST /register route to ensure that the CSRF token is not tampered with
     let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
 
+    // If the CSRF token does not match, then set a flash message telling the user that the CSRF token 
+    // is mismatched, and that the approval process is rejected, then redirect to the register page
     if (!compareResult){
         return res.render("register", { 
             layout: undefined, 
@@ -832,6 +864,9 @@ app.get("/about", async (req, res) => {
         return
     }
 
+    // If the browser cookie exists, the user session in the database exists as well, and the user is 
+    // not logged in as a member or admin, then greet the user with the about us page without displaying
+    // the member dashboard or admin dashboard buttons in the navigation bar
     res.render("about", {
         layout: undefined
     })
@@ -881,6 +916,8 @@ app.get("/forgot-password", async(req, res) => {
 
         return
     }
+
+    // Generate a CSRF token for the forgot password form
     let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
 
     // Check and Retrieve any flash messages that are part of the user's current session
@@ -928,6 +965,9 @@ app.get("/forgot-password", async(req, res) => {
         return
     }
 
+    // If a flash message exists storing the CSRF token mismatch message coming from the POST 
+    // /submit-email route, then render the CSRF token mismatch message as part of the forgot password 
+    // page
     if (flashMessage === "CSRF token mismatch, approval process rejected"){
         let invalidResetKey = flashMessage
 
@@ -940,7 +980,7 @@ app.get("/forgot-password", async(req, res) => {
         return
     }
 
-    // If not flash messages exist, then render the forgot password page
+    // If no flash messages exist, then render the forgot password page
     res.render("forgot_password", {
         layout: undefined,
         csrfToken: csrfToken
@@ -950,6 +990,7 @@ app.get("/forgot-password", async(req, res) => {
 
 
 app.post("/submit-email", async(req, res) => {
+    // Retrieve the CSRF token from the form field
     let csrfToken = req.body.csrf
     // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
@@ -982,8 +1023,11 @@ app.post("/submit-email", async(req, res) => {
         return
     }
 
+    // Compare the CSRF token from the form field with the CSRF token stored in the database
     let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
 
+    // If the CSRF tokens do not match, then set a flash message telling the user that the approval process
+    // has been rejected, then redirect to the forgot password page
     if (!compareResult){
         await flash_messages.setFlash(userSession.sessionID, "CSRF token mismatch, approval process rejected")
         res.redirect("/forgot-password")
@@ -1021,6 +1065,8 @@ app.get('/reset-password', async (req, res) => {
 
         return
     }
+
+    // Generate a CSRF token for the reset password form
     let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
 
     // Check if the reset key exists in the database
@@ -1123,8 +1169,10 @@ app.post('/reset-password', async (req, res) => {
         return
     }
 
+    // Compare the CSRF token from the form field with the CSRF token stored in the database 
     let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
 
+    // If the CSRF tokens do not match, then render the reset password page with an error message
     if (!compareResult){
         await csrf_protection.cancelToken(sessionID)
         res.render("reset_password", {
@@ -1142,7 +1190,9 @@ app.post('/reset-password', async (req, res) => {
     await passwordReset.setNewPassword(resetKey, newPassword)
     await flash_messages.setFlash(userSession.sessionID, "Password reset successfully.")
 
+    // Cancel the CSRF token
     await csrf_protection.cancelToken(sessionID)
+
     // Redirect to the login page
     res.redirect("/login")
 })
@@ -1176,10 +1226,13 @@ app.get("/change-profile-details", async (req, res) => {
         return
     }
 
+    // Get the user's current account details from the database
     let userAccount = await change_profile_details.findUserAccount(userSession.sessionData.username)
     
+    // Generate a CSRF token for the user session
     let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
 
+    // Render the change profile details page with the user's current account details and the CSRF token
     res.render("change_profile_details", {
         layout: undefined,
         userAccount: userAccount,
@@ -1190,7 +1243,9 @@ app.get("/change-profile-details", async (req, res) => {
 
 
 app.post("/change-profile-details", async (req, res) => {
+    // Retrieve the CSRF token from the form field
     let csrfToken = req.body.csrf
+
     // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
@@ -1208,6 +1263,7 @@ app.post("/change-profile-details", async (req, res) => {
         return
     }
 
+    // Get the users's current account details from the database
     let userAccount = await change_profile_details.findUserAccount(userSession.sessionData.username)
 
     // Get the user's new firstname, lastname, email, username, password, and password confirmation inputs from the form fields
@@ -1218,6 +1274,7 @@ app.post("/change-profile-details", async (req, res) => {
     let passwordInput = req.body.passwordInput
     let repeatPasswordInput = req.body.repeatPasswordInput
 
+    // Create an object to store the modified user details
     let modifiedUserDetails = {
         firstname: "",
         lastname: "",
@@ -1227,6 +1284,8 @@ app.post("/change-profile-details", async (req, res) => {
         role: userAccount.userDetails.role
     }
 
+    // Check if the user's new firstname and lastname inputs are different from the current 
+    // firstname and lastname stored
     if (firstnameInput !== userAccount.userDetails.firstname || lastnameInput !== userAccount.userDetails.lastname) {
         // Before letter validation, Remove any leading or trailing whitespaces from firstname and lastname
         firstnameInput = firstnameInput.trim()
@@ -1254,12 +1313,15 @@ app.post("/change-profile-details", async (req, res) => {
         firstnameInput = firstnameInput.replace(/\s+/g, "")
         lastnameInput = lastnameInput.replace(/\s+/g, "")
 
+        // If firstname and lastname consist of letters only, then update the modified user details 
+        // object with the new firstname and lastname
         if (firstnameLastnameValidated){
             modifiedUserDetails.firstname = firstnameInput
             modifiedUserDetails.lastname = lastnameInput
         }
     }
 
+    // If a password input or repeat password input exists
     if (passwordInput || repeatPasswordInput){
         // Check if the user-inputted passwords match
         let passwordsMatch = await registration_form_validation.checkPasswordMatch(passwordInput, repeatPasswordInput)
@@ -1312,12 +1374,15 @@ app.post("/change-profile-details", async (req, res) => {
             })
         }
 
+        // If the user-inputted passwords match, and the user password meets the password complexity 
+        // requirements, then update the modified user details object with the new password
         if (passwordsMatch && passwordComplexityValidated){
             modifiedUserDetails.password = passwordInput
             
         }
     }
 
+    // Check if the user's new username input is different from the current username stored
     if (usernameInput !== userAccount.userDetails.username) {
         //Before username validation, remove any leading or trailing whitespaces from username
         usernameInput = usernameInput.trim()
@@ -1371,11 +1436,14 @@ app.post("/change-profile-details", async (req, res) => {
             })
         }
 
+        // If username meets criteria and does not exist in database, then update the modified user 
+        // details object with
         if (usernameValidated && !usernameExists){
             modifiedUserDetails.username = usernameInput
         }
     }
 
+    // Check if the user's new email input is different from the current email stored
     if (emailInput !== userAccount.userDetails.email) {
         //Validates the email format of user-inputted email
         let emailValidated = await registration_form_validation.validateEmail(emailInput)
@@ -1419,12 +1487,18 @@ app.post("/change-profile-details", async (req, res) => {
             })
         }
 
+        // If email meets criteria and does not exist in database, then update the modified user 
+        // details object with the new email
         if (emailValidated && !emailExists){
             modifiedUserDetails.email = emailInput
         }
     }
+        // Check if the CSRF token stored as part of the user's session matches the CSRF token submitted 
+        // in the form
         let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
 
+        // If the CSRF tokens does not match, then cancel the token, and render the change profile 
+        // details page with an error message
         if (!compareResult){
             await csrf_protection.cancelToken(sessionID)
             return res.render("change_profile_details", { 
@@ -1444,18 +1518,25 @@ app.post("/change-profile-details", async (req, res) => {
             })
         }   
     
+    // If the CSRF tokens match, then update the user's details in the database
     await change_profile_details.fillInExistingValues(modifiedUserDetails, userSession.sessionData.username)
     await change_profile_details.updateUserDetailsByID(modifiedUserDetails, userAccount._id, userSession.sessionData.username)
 
+    // Update the user's session data with the new username
     userSession.sessionData.username = modifiedUserDetails.username
     await session_management.updateSession(sessionID, userSession)
 
+    // If the user is logged in as a member, then cancel the CSRF token, and render the updated profile
+    // details alert page with the member dashboard
     if (userSession.sessionData.role === "member"){
         await csrf_protection.cancelToken(sessionID)
         res.render("updated_profile_details_alert", {
             layout: undefined,
             userIsMember: true
         })
+
+    // If the user is logged in as an admin, then cancel the CSRF token, and render the updated profile
+    // details alert page with the admin dashboard
     } else if (userSession.sessionData.role === "admin"){
         await csrf_protection.cancelToken(sessionID)
         res.render("updated_profile_details_alert", {
@@ -1467,13 +1548,18 @@ app.post("/change-profile-details", async (req, res) => {
 
 
 app.get('/posts', async (req, res) => {
+    // Retrieve all the posts and fixed locations from the database
     const dbPosts = await posts.getPosts()
     const fixed_locations = await location.getlocations()
 
-
+    // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
 
+    // If the browser cookie does not exist, or the user session in the database does not exist, 
+    // then start a new user session, create a new browser cookie containing the sessionID, and set a
+    // flash message telling the user that the session has expired, and that he should login again,
+    // then redirect to the login page and exit the function
     if (!sessionID || !userSession) {
         let newUserSession = await session_management.startSession({role: "publicViewer"})
         res.cookie("sessionID", newUserSession.sessionID, {expires:newUserSession.sessionExpiry})
@@ -1484,10 +1570,14 @@ app.get('/posts', async (req, res) => {
         return
     }
 
+    // If the user does not have a browser cookie or session in the database, or if the user is logged 
+    // in as an admin, then greet the user with the posts page, and display the admin dashboard
     if ((sessionID && userSession) && (userSession.sessionData.role === "admin")) {
 
+        // Generate a CSRF token for the form 
         let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
 
+        // Render the posts page with the admin dashboard
         res.render("posts", {
             layout: undefined,
             userIsAdmin: true,
@@ -1499,10 +1589,14 @@ app.get('/posts', async (req, res) => {
         return
     }
 
+    // If the user does not have a browser cookie or session in the database, or if the user is logged 
+    // in as a member, then greet the user with the posts page, and display the member dashboard
     if((sessionID && userSession) && (userSession.sessionData.role === "member")){
 
+        // Generate a CSRF token for the form 
         let csrfToken = await csrf_protection.generateCSRFFormToken(sessionID)
 
+        // Render the posts page with the member dashboard
         res.render("posts", {
             layout: undefined,
             userIsMember: true,
@@ -1513,6 +1607,9 @@ app.get('/posts', async (req, res) => {
 
         return
     }
+
+    // If the user does not have a browser cookie or session in the database, or if the user is logged
+    // in as a public viewer, then greet the user with the posts page
     res.render("posts", {
         layout: undefined,
         locations: dbPosts,
@@ -1523,7 +1620,9 @@ app.get('/posts', async (req, res) => {
 
 
 app.post('/posts', async (req, res) => {
+    // Retrieve the CSRF token from the form field
     let csrfToken = req.body.csrf
+
     // Retrieve the current user session from the database using the sessionID stored in the cookie
     let sessionID = req.cookies.sessionID
     let userSession = await session_management.getSession(sessionID)
@@ -1541,14 +1640,21 @@ app.post('/posts', async (req, res) => {
         return
     }
     
+    // If the user is not logged in as a member or admin, or if the user does not have a browser cookie 
+    // or session in the database, then set a flash message telling the user that he must be signed in 
+    // to be able to post, and redirect to the login page
     if ((sessionID && userSession) && (userSession.sessionData.role !== "member" && userSession.sessionData.role !== "admin")) {
         await flash_messages.setFlash(userSession.sessionID, "You must be signed in to be able to post.")
         res.redirect("/login")
         return
     }
 
+    // Check if the CSRF token stored as part of the user's session matches the CSRF token submitted 
+    // in the form
     let compareResult = await csrf_protection.compareToken(csrfToken,sessionID)
 
+    // If the CSRF tokens do not match, then cancel the CSRF token, set a flash message telling the user
+    // that the approval process has been rejected, and redirect to the login page
     if (!compareResult){
         await csrf_protection.cancelToken(sessionID)
         await flash_messages.setFlash(userSession.sessionID, "CSRF token mismatch, approval process rejected")
@@ -1556,14 +1662,18 @@ app.post('/posts', async (req, res) => {
         return
     }   
     
-
+    // If the user is logged in as a member or admin, and the CSRF tokens match, then check if the user
+    // has uploaded a file as part of the form submission
     if(req.files && req.files.submission){
 
+        // If the user has uploaded a file, then move the file to the uploads folder, and rename the 
+        // file
         let theFile = req.files.submission;
         let timestamp = Date.now();
         let fileName = `${timestamp}_${req.files.submission.name}`;
         await theFile.mv(`${__dirname}/uploads/${fileName}`)
 
+        // Create an object containing the user's post details
         let userInput = {
             username: userSession.sessionData.username,
             name: req.body.location_name,
@@ -1580,11 +1690,15 @@ app.post('/posts', async (req, res) => {
             file_path: fileName
         }
 
+        // Update the location details in the database, insert the user's post details into the database,
+        // cancel the CSRF token, and redirect to the posts page
         await posts.updateLocations(req.body.location_name, userInput)
         await posts.insertPost(userInput)
         await csrf_protection.cancelToken(sessionID)
         res.redirect('/posts')
-
+    
+    // If the user has not uploaded a file as part of the form submission, then create an object 
+    // containing the user's post details
     }else{
         let userInput = {
             username: userSession.sessionData.username,
@@ -1601,6 +1715,8 @@ app.post('/posts', async (req, res) => {
             }
         };
 
+        // Update the location details in the database, insert the user's post details into the database,
+        // cancel the CSRF token, and redirect to the posts page
         await posts.updateLocations(req.body.location_name, userInput)
         await posts.insertPost(userInput)
         await csrf_protection.cancelToken(sessionID)
